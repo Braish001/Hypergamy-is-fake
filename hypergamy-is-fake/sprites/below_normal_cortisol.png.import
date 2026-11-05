@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b14anpnsodsyc"
-path="res://.godot/imported/cortisolscale.png-7532470db4d1f589f9563151f16bc986.ctex"
+uid="uid://cxkl5jhv6mbrg"
+path="res://.godot/imported/below_normal_cortisol.png-e951696ec102dda671161d5027a29450.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/cortisolscale.png"
-dest_files=["res://.godot/imported/cortisolscale.png-7532470db4d1f589f9563151f16bc986.ctex"]
+source_file="res://sprites/below_normal_cortisol.png"
+dest_files=["res://.godot/imported/below_normal_cortisol.png-e951696ec102dda671161d5027a29450.ctex"]
 
 [params]
 

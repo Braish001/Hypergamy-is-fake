@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bawmcf62c2yap"]
 
 [ext_resource type="PackedScene" uid="uid://c0gmd4l6hkg1d" path="res://player.tscn" id="1_f3sb7"]
+[ext_resource type="Texture2D" uid="uid://wve5cgebg04o" path="res://sprites/low_cortisol.png" id="2_fj7yv"]
 
 [node name="World" type="Node2D" unique_id=319775989]
 
@@ -17,5 +18,22 @@ offset_right = 3234.876
 offset_bottom = 727.0
 color = Color(0, 1, 1, 1)
 
-[node name="Player" parent="." unique_id=1275611609 instance=ExtResource("1_f3sb7")]
+[node name="Player" parent="." unique_id=1275611609 node_paths=PackedStringArray("cortisol_ui") instance=ExtResource("1_f3sb7")]
 position = Vector2(879, 518)
+dash_cooldown = 4.0
+cortisol_ui = NodePath("../CanvasLayer/TextureRect")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1715652402]
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer" unique_id=2078435053]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -346.5946
+offset_bottom = 229.0
+grow_horizontal = 0
+size_flags_horizontal = 8
+size_flags_vertical = 0
+texture = ExtResource("2_fj7yv")
+expand_mode = 1
+stretch_mode = 5
