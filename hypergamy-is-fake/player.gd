@@ -47,7 +47,7 @@ func _physics_process(delta: float) -> void:
 
 func _ready() -> void:
 	# 1. Загружаем картинку как Image
-	var img = Image.load_from_file("res://sprites/cursor.png")
+	var img = Image.load_from_file("res://sprites/cursor_game.png")
 	
 	# 2. Изменяем размер прямо в памяти (например, до 32 на 32 пикселя)
 	img.resize(48, 48, Image.INTERPOLATE_BILINEAR)
