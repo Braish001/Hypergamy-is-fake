@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://bvhap3fyukl4c"]
+
+[ext_resource type="Script" uid="uid://bfchfl0wb0ha0" path="res://npc.gd" id="1_5vjc4"]
+[ext_resource type="Texture2D" uid="uid://j3wcpncj27ek" path="res://sprites/trueadam_2.png" id="2_5vjc4"]
+[ext_resource type="Texture2D" uid="uid://2hplmpyammpx" path="res://sprites/body_adam_2.png" id="2_t47uk"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_6xynh"]
+radius = 74.0
+height = 272.0
+
+[node name="NPC" type="CharacterBody2D" unique_id=1640683601]
+script = ExtResource("1_5vjc4")
+
+[node name="T-shirt" type="Sprite2D" parent="." unique_id=683902586]
+position = Vector2(13.999999, 118)
+scale = Vector2(1.1015625, 1.1015625)
+texture = ExtResource("2_t47uk")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1259726964]
+position = Vector2(0, 9.536743e-07)
+scale = Vector2(0.1852764, 0.18527645)
+texture = ExtResource("2_5vjc4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=530161661]
+position = Vector2(1, 80)
+shape = SubResource("CapsuleShape2D_6xynh")
+
+[node name="Timer" type="Timer" parent="." unique_id=461630569]
+wait_time = 2.0
+autostart = true

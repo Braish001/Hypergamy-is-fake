@@ -3,7 +3,7 @@ extends CharacterBody2D
 @export var speed: float = 1200.0
 @export var dash_speed: float = 3000.0      # Скорость во время рывка
 @export var dash_duration: float = 0.2      # Длительность рывка в секундах
-@export var dash_cooldown: float = 0.4      # Перезарядка рывка (4 секунды)
+@export var dash_cooldown: float = 0.4      # Перезарядка рывка
 
 # Система кортизола
 var cortisol: float = 0.0
@@ -22,6 +22,13 @@ var dash_time_left: float = 0.0
 var cooldown_time_left: float = 0.0
 var dash_direction: Vector2 = Vector2.DOWN
 
+# --- СИСТЕМА ОРУЖИЯ В РУКАХ ---
+# Убедись, что у узла Player есть дочерний Sprite2D с именем HeldItemSprite
+@onready var held_item_sprite: Sprite2D = $HeldItemSprite
+
+# Массив текстур оружия — настраивай их прямо в Инспекторе Godot (размер Size = 4)
+@export var weapon_textures: Array[Texture2D] = []
+
 func _ready() -> void:
 	# 1. Загружаем картинку курсора
 	var img = Image.load_from_file("res://sprites/cursor_game.png")
@@ -39,6 +46,10 @@ func _ready() -> void:
 	]
 	
 	update_cortisol_display()
+	
+	# При старте прячем оружие в руках
+	if held_item_sprite != null:
+		held_item_sprite.visible = false
 
 func _physics_process(delta: float) -> void:
 	# 1. Убывание 1 единицы кортизола раз в 1 минуту (60 секунд)
@@ -86,7 +97,6 @@ func _physics_process(delta: float) -> void:
 
 # Функция обновления картинки и текста кортизола в UI
 func update_cortisol_display() -> void:
-	# Обновляем картинку шкалы
 	if cortisol_ui != null:
 		var stage_index = int(cortisol / 20)
 		stage_index = clamp(stage_index, 0, cortisol_stages.size() - 1)
@@ -94,6 +104,45 @@ func update_cortisol_display() -> void:
 		if cortisol_stages[stage_index] != null:
 			cortisol_ui.texture = cortisol_stages[stage_index]
 	
-	# Обновляем текст с числовым значением
 	if cortisol_label != null:
 		cortisol_label.text = str(int(cortisol))
+
+# --- ФУНКЦИИ УПРАВЛЕНИЯ ОРУЖИЕМ В РУКАХ ---
+# --- ФУНКЦИИ УПРАВЛЕНИЯ ОРУЖИЕМ В РУКАХ ---
+# --- ФУНКЦИИ УПРАВЛЕНИЯ ОРУЖИЕМ В РУКАХ ---
+# --- ФУНКЦИИ УПРАВЛЕНИЯ ОРУЖИЕМ В РУКАХ ---
+func equip_weapon(slot_index: int) -> void:
+	print("--- ВЫЗВАНА ФУНКЦИЯ equip_weapon со слотом: ", slot_index, " ---")
+	
+	if held_item_sprite == null:
+		print("ОШИБКА: Узел HeldItemSprite РАВЕН NULL! Узел не найден!")
+		return
+	else:
+		print("Успех: Узел HeldItemSprite найден в памяти.")
+		
+	if slot_index == -1:
+		hide_held_weapon()
+	else:
+		if slot_index >= 0 and slot_index < weapon_textures.size():
+			var tex = weapon_textures[slot_index]
+			if tex != null:
+				print("Беру текстуру для слота ", slot_index, " -> путь: ", tex.resource_path)
+				show_held_weapon(tex)
+			else:
+				print("ОШИБКА: В массиве weapon_textures на позиции ", slot_index, " лежит ПУСТОТА (null)! Ты забыл перетуда картинку в инспекторе!")
+		else:
+			print("ОШИБКА: Индекс слота ", slot_index, " выходящий за рамки массива текстур!")
+
+func show_held_weapon(new_texture: Texture2D) -> void:
+	print("УСПЕХ: Показываю текстуру в руках -> ", new_texture.resource_path)
+	held_item_sprite.texture = new_texture
+	held_item_sprite.visible = true
+	
+	# Делаем большой размер, чтобы точно заметить на экране
+	held_item_sprite.scale = Vector2(0.3, 0.3)
+	held_item_sprite.self_modulate = Color(1, 1, 1, 1)
+
+func hide_held_weapon() -> void:
+	held_item_sprite.visible = false
+	
+	
