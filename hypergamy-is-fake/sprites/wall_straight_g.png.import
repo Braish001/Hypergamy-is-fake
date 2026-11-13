@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bg8seuwshdyrx"
-path="res://.godot/imported/wall_corner_up_left.png-189257e633495fb38501b0d77ec63bf3.ctex"
+uid="uid://ceqcia4fyhxc3"
+path="res://.godot/imported/wall_straight_g.png-9f54c2207ff6bfa2f7284af0cdcae584.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/wall_corner_up_left.png"
-dest_files=["res://.godot/imported/wall_corner_up_left.png-189257e633495fb38501b0d77ec63bf3.ctex"]
+source_file="res://sprites/wall_straight_g.png"
+dest_files=["res://.godot/imported/wall_straight_g.png-9f54c2207ff6bfa2f7284af0cdcae584.ctex"]
 
 [params]
 

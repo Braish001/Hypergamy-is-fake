@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cyal15qup6pf7"
-path="res://.godot/imported/wall_corner_down_left.png-a2ec00515efc9677995c42b82224aecf.ctex"
+uid="uid://crokr82dtnu8j"
+path="res://.godot/imported/concrete_white.png-febeb31f9cef67449c6f2a615542f6d5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/wall_corner_down_left.png"
-dest_files=["res://.godot/imported/wall_corner_down_left.png-a2ec00515efc9677995c42b82224aecf.ctex"]
+source_file="res://sprites/concrete_white.png"
+dest_files=["res://.godot/imported/concrete_white.png-febeb31f9cef67449c6f2a615542f6d5.ctex"]
 
 [params]
 
