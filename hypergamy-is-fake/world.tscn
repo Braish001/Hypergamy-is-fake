@@ -1,15 +1,57 @@
 [gd_scene format=3 uid="uid://bawmcf62c2yap"]
 
 [ext_resource type="PackedScene" uid="uid://c0gmd4l6hkg1d" path="res://player.tscn" id="1_f3sb7"]
-[ext_resource type="Texture2D" uid="uid://wve5cgebg04o" path="res://sprites/low_cortisol.png" id="2_fj7yv"]
+[ext_resource type="Texture2D" uid="uid://bvhkg1wha0pfi" path="res://sprites/low_cortisol.png" id="2_fj7yv"]
+[ext_resource type="Texture2D" uid="uid://dnjd6mnuro5y2" path="res://sprites/wall_cross.png" id="3_dwbse"]
+[ext_resource type="Texture2D" uid="uid://sotoxhqrwvmt" path="res://sprites/wall_corner.png" id="4_pkg7o"]
+[ext_resource type="Texture2D" uid="uid://u7nyiq1lqnk" path="res://sprites/wall_down.png" id="5_gbfbk"]
+[ext_resource type="Texture2D" uid="uid://cwlechlbyquai" path="res://sprites/concrete_black.png" id="5_ioo17"]
+[ext_resource type="Texture2D" uid="uid://di1hsi22id7mq" path="res://sprites/wall_straight_g.png" id="6_ioo17"]
+[ext_resource type="Texture2D" uid="uid://bqfpp06qvas40" path="res://sprites/concrete_white.png" id="7_wse8f"]
+[ext_resource type="Texture2D" uid="uid://c4ol2gcrxsoxl" path="res://sprites/snow.png" id="8_ic0uy"]
+
+[sub_resource type="FontFile" id="FontFile_jqwnn"]
+cache/0/variation_coordinates = {}
+cache/0/face_index = 0
+cache/0/embolden = 0.0
+cache/0/transform = Transform2D(1, 0, 0, 1, 0, 0)
+cache/0/spacing_top = 0
+cache/0/spacing_bottom = 0
+cache/0/spacing_space = 0
+cache/0/spacing_glyph = 0
+cache/0/baseline_offset = 0.0
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/24/0/ascent = 0.0
+cache/0/24/0/descent = 0.0
+cache/0/24/0/underline_position = 0.0
+cache/0/24/0/underline_thickness = 0.0
+cache/0/24/0/scale = 1.0
+cache/0/20/0/ascent = 0.0
+cache/0/20/0/descent = 0.0
+cache/0/20/0/underline_position = 0.0
+cache/0/20/0/underline_thickness = 0.0
+cache/0/20/0/scale = 1.0
+cache/0/28/0/ascent = 0.0
+cache/0/28/0/descent = 0.0
+cache/0/28/0/underline_position = 0.0
+cache/0/28/0/underline_thickness = 0.0
+cache/0/28/0/scale = 1.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_mbj86"]
+font_size = 28
+font_color = Color(0, 0, 0, 1)
 
 [node name="World" type="Node2D" unique_id=319775989]
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1913116965]
-offset_left = -504.0
-offset_top = -389.0
-offset_right = 1710.876
-offset_bottom = 1084.0
+offset_left = -450.0
+offset_top = -131.0
+offset_right = 1764.876
+offset_bottom = 1342.0
 
 [node name="ColorRect2" type="ColorRect" parent="." unique_id=2039920024]
 offset_left = 1020.0
@@ -18,10 +60,10 @@ offset_right = 3234.876
 offset_bottom = 727.0
 color = Color(0, 1, 1, 1)
 
-[node name="Player" parent="." unique_id=1275611609 node_paths=PackedStringArray("cortisol_ui") instance=ExtResource("1_f3sb7")]
+[node name="Player" parent="." unique_id=1275611609 node_paths=PackedStringArray("cortisol_ui", "cortisol_label") instance=ExtResource("1_f3sb7")]
 position = Vector2(879, 518)
-dash_cooldown = 4.0
 cortisol_ui = NodePath("../CanvasLayer/TextureRect")
+cortisol_label = NodePath("../CanvasLayer/TextureRect/Label")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1715652402]
 
@@ -37,3 +79,94 @@ size_flags_vertical = 0
 texture = ExtResource("2_fj7yv")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="Label" type="Label" parent="CanvasLayer/TextureRect" unique_id=1687700362]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 0
+offset_left = 249.5946
+offset_top = 24.0
+offset_right = 390.5946
+offset_bottom = 57.0
+theme_override_fonts/font = SubResource("FontFile_jqwnn")
+label_settings = SubResource("LabelSettings_mbj86")
+
+[node name="Sprite2D4" type="Sprite2D" parent="." unique_id=175697050]
+texture_filter = 1
+position = Vector2(354, 362)
+texture = ExtResource("3_dwbse")
+
+[node name="Sprite2D3" type="Sprite2D" parent="." unique_id=1254223863]
+texture_filter = 1
+position = Vector2(482, 362)
+rotation = 1.5707964
+texture = ExtResource("4_pkg7o")
+
+[node name="Sprite2D9" type="Sprite2D" parent="." unique_id=1820097306]
+texture_filter = 1
+position = Vector2(290, 426)
+texture = ExtResource("5_ioo17")
+
+[node name="Sprite2D6" type="Sprite2D" parent="." unique_id=704611909]
+texture_filter = 1
+position = Vector2(290, 362)
+rotation = 1.5707964
+texture = ExtResource("5_gbfbk")
+
+[node name="Sprite2D8" type="Sprite2D" parent="." unique_id=768603782]
+texture_filter = 1
+position = Vector2(418, 426)
+texture = ExtResource("7_wse8f")
+
+[node name="Sprite2D15" type="Sprite2D" parent="." unique_id=395116227]
+texture_filter = 1
+position = Vector2(482, 298)
+rotation = 1.5707964
+texture = ExtResource("8_ic0uy")
+
+[node name="Sprite2D14" type="Sprite2D" parent="." unique_id=679000645]
+texture_filter = 1
+position = Vector2(546, 426)
+rotation = 4.712389
+texture = ExtResource("8_ic0uy")
+
+[node name="Sprite2D13" type="Sprite2D" parent="." unique_id=1659834052]
+texture_filter = 1
+position = Vector2(610, 298)
+texture = ExtResource("8_ic0uy")
+
+[node name="Sprite2D12" type="Sprite2D" parent="." unique_id=1351258203]
+texture_filter = 1
+position = Vector2(546, 298)
+rotation = 3.1415927
+texture = ExtResource("8_ic0uy")
+
+[node name="Sprite2D11" type="Sprite2D" parent="." unique_id=1011174357]
+texture_filter = 1
+position = Vector2(546, 362)
+texture = ExtResource("8_ic0uy")
+
+[node name="Sprite2D10" type="Sprite2D" parent="." unique_id=1005309355]
+texture_filter = 1
+position = Vector2(418, 298)
+texture = ExtResource("8_ic0uy")
+
+[node name="Sprite2D5" type="Sprite2D" parent="." unique_id=599007064]
+texture_filter = 1
+position = Vector2(418, 362)
+texture = ExtResource("6_ioo17")
+
+[node name="Sprite2D7" type="Sprite2D" parent="." unique_id=348512854]
+texture_filter = 1
+position = Vector2(482, 426)
+texture = ExtResource("5_gbfbk")
+
+[node name="Sprite2D2" type="Sprite2D" parent="." unique_id=684889334]
+texture_filter = 1
+position = Vector2(354, 426)
+texture = ExtResource("5_gbfbk")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=146060346]
+texture_filter = 1
+position = Vector2(354, 298)
+rotation = 3.1415927
+texture = ExtResource("5_gbfbk")

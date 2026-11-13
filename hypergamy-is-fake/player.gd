@@ -10,8 +10,9 @@ var cortisol: float = 0.0
 var max_cortisol: float = 100.0
 var decay_timer: float = 0.0
 
-# Перетащи TextureRect сюда прямо из дерева сцены через Инспектор!
+# Перетащи TextureRect и Label сюда прямо из дерева сцены через Инспектор!
 @export var cortisol_ui: TextureRect
+@export var cortisol_label: Label
 
 # Массив спрайтов кортизола (в строгом правильном порядке)
 var cortisol_stages: Array[Texture2D] = []
@@ -83,13 +84,16 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-# Функция обновления картинки кортизола в UI
+# Функция обновления картинки и текста кортизола в UI
 func update_cortisol_display() -> void:
-	if cortisol_ui == null:
-		return
+	# Обновляем картинку шкалы
+	if cortisol_ui != null:
+		var stage_index = int(cortisol / 20)
+		stage_index = clamp(stage_index, 0, cortisol_stages.size() - 1)
+		
+		if cortisol_stages[stage_index] != null:
+			cortisol_ui.texture = cortisol_stages[stage_index]
 	
-	var stage_index = int(cortisol / 20)
-	stage_index = clamp(stage_index, 0, cortisol_stages.size() - 1)
-	
-	if cortisol_stages[stage_index] != null:
-		cortisol_ui.texture = cortisol_stages[stage_index]
+	# Обновляем текст с числовым значением
+	if cortisol_label != null:
+		cortisol_label.text = str(int(cortisol))
