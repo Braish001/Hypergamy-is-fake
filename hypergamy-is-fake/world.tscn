@@ -12,7 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://bmcsmnw852wg1" path="res://sprites/watergun.png" id="5_wukud"]
 [ext_resource type="Texture2D" uid="uid://dfgjgrka8vo8" path="res://sprites/hypergamy.jpg" id="6_il2jm"]
 [ext_resource type="Texture2D" uid="uid://di1hsi22id7mq" path="res://sprites/wall_straight_g.png" id="6_ioo17"]
-[ext_resource type="AudioStream" uid="uid://b8hx23f6mlcip" path="res://sprites/item-select.mp3" id="7_26xuy"]
+[ext_resource type="AudioStream" uid="uid://bxd610nax0aey" path="res://sounds/item-select.mp3" id="7_26xuy"]
 [ext_resource type="Texture2D" uid="uid://bqfpp06qvas40" path="res://sprites/concrete_white.png" id="7_wse8f"]
 [ext_resource type="Texture2D" uid="uid://c4ol2gcrxsoxl" path="res://sprites/snow.png" id="8_ic0uy"]
 [ext_resource type="PackedScene" uid="uid://bbo12xh5pynwv" path="res://npc.tscn" id="10_wse8f"]
@@ -20,6 +20,7 @@
 [ext_resource type="PackedScene" uid="uid://crl3hq8fk5ti6" path="res://npc_3.tscn" id="12_hiqwa"]
 [ext_resource type="PackedScene" uid="uid://bvhap3fyukl4c" path="res://npc_4.tscn" id="13_2u3nc"]
 [ext_resource type="PackedScene" uid="uid://5y1nbsveuq53" path="res://npc_5.tscn" id="14_udxuc"]
+[ext_resource type="AudioStream" uid="uid://cyjpfawwnp3oy" path="res://sounds/bonesmash.mp3" id="16_bc84e"]
 
 [sub_resource type="FontFile" id="FontFile_jqwnn"]
 cache/0/variation_coordinates = {}
@@ -77,10 +78,10 @@ color = Color(0, 1, 1, 1)
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -295.5946
-offset_top = 3.0
-offset_right = 51.0
-offset_bottom = 232.0
+offset_left = -1198.0
+offset_top = 441.0
+offset_right = -851.4054
+offset_bottom = 670.0
 grow_horizontal = 0
 size_flags_horizontal = 8
 size_flags_vertical = 0
@@ -91,12 +92,19 @@ stretch_mode = 5
 [node name="Label" type="Label" parent="CanvasLayer/TextureRect" unique_id=1687700362]
 modulate = Color(0, 0, 0, 1)
 layout_mode = 0
-offset_left = 249.5946
-offset_top = 24.0
-offset_right = 390.5946
-offset_bottom = 57.0
+offset_left = 246.0
+offset_top = 23.0
+offset_right = 387.0
+offset_bottom = 62.0
 theme_override_fonts/font = SubResource("FontFile_jqwnn")
 label_settings = SubResource("LabelSettings_mbj86")
+
+[node name="BeautyLabel" type="Label" parent="CanvasLayer/TextureRect" unique_id=864286278]
+layout_mode = 0
+offset_left = 1042.0
+offset_top = -423.0
+offset_right = 1182.0
+offset_bottom = -363.0
 
 [node name="WeaponWheel" type="Control" parent="CanvasLayer" unique_id=1140077928 node_paths=PackedStringArray("player_node")]
 layout_mode = 3
@@ -249,8 +257,15 @@ rotation = 3.1415927
 scale = Vector2(2, 2)
 texture = ExtResource("5_gbfbk")
 
-[node name="Player" parent="." unique_id=1275611609 instance=ExtResource("1_f3sb7")]
+[node name="Player" parent="." unique_id=1275611609 node_paths=PackedStringArray("cortisol_ui", "cortisol_label") instance=ExtResource("1_f3sb7")]
 position = Vector2(450, 913)
+cortisol_ui = NodePath("../CanvasLayer/TextureRect")
+cortisol_label = NodePath("../CanvasLayer/TextureRect/Label")
+hit_sound = ExtResource("16_bc84e")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Player" unique_id=279663413]
+stream = ExtResource("16_bc84e")
+volume_db = -19.113
 
 [node name="NPC2" parent="." unique_id=1520599775 instance=ExtResource("10_wse8f")]
 position = Vector2(589, 867)
