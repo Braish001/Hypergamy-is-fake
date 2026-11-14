@@ -2,13 +2,20 @@
 
 [ext_resource type="Script" uid="uid://dduin2dfkiaie" path="res://player.gd" id="1_i3pqv"]
 [ext_resource type="Texture2D" uid="uid://bdhqs068t3sfw" path="res://sprites/player_body.png" id="2_hqtel"]
+[ext_resource type="Texture2D" uid="uid://bmcsmnw852wg1" path="res://sprites/watergun.png" id="3_dw050"]
 [ext_resource type="Texture2D" uid="uid://byros4mw8px84" path="res://sprites/player(sub3).png" id="3_sweqy"]
+[ext_resource type="Texture2D" uid="uid://c31ui4u86ix5q" path="res://sprites/shotgun.png" id="4_b26j0"]
 [ext_resource type="Script" uid="uid://l6fq30r37yon" path="res://camera_2d.gd" id="4_hqtel"]
+[ext_resource type="Texture2D" uid="uid://dfgjgrka8vo8" path="res://sprites/hypergamy.jpg" id="5_n7ghd"]
+[ext_resource type="Texture2D" uid="uid://bwrm33def6vbx" path="res://sprites/hammer.png" id="5_sweqy"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_pdmmi"]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_cbp6q"]
+radius = 53.0
+height = 250.0
 
 [node name="Player" type="CharacterBody2D" unique_id=1275611609]
 script = ExtResource("1_i3pqv")
+weapon_textures = Array[Texture2D]([ExtResource("5_sweqy"), ExtResource("3_dw050"), ExtResource("4_b26j0"), ExtResource("5_n7ghd")])
 
 [node name="T-shirt" type="Sprite2D" parent="." unique_id=942863262]
 position = Vector2(10, 69)
@@ -20,9 +27,14 @@ scale = Vector2(0.43382353, 0.43382353)
 texture = ExtResource("3_sweqy")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=83789890]
-position = Vector2(0, 132)
-shape = SubResource("CircleShape2D_pdmmi")
+position = Vector2(2, 16)
+shape = SubResource("CapsuleShape2D_cbp6q")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1609199414]
 zoom = Vector2(0.35, 0.35)
 script = ExtResource("4_hqtel")
+
+[node name="HeldItemSprite" type="Sprite2D" parent="." unique_id=143630944]
+position = Vector2(53.999996, 54.000015)
+scale = Vector2(0.22296014, 0.22296014)
+texture = ExtResource("5_sweqy")

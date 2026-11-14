@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://bbo12xh5pynwv"]
+
+[ext_resource type="Script" uid="uid://bfchfl0wb0ha0" path="res://npc.gd" id="1_xxcha"]
+[ext_resource type="Texture2D" uid="uid://bhywtq3dhmfer" path="res://sprites/chad_2.png" id="2_kh24r"]
+[ext_resource type="Texture2D" uid="uid://d4ivk0gjvcvoq" path="res://sprites/body_chad_1.png" id="2_ul7y6"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_cbp6q"]
+radius = 62.0
+height = 274.0
+
+[node name="NPC" type="CharacterBody2D" unique_id=1640683601]
+script = ExtResource("1_xxcha")
+
+[node name="T-shirt" type="Sprite2D" parent="." unique_id=683902586]
+position = Vector2(2.000001, 88)
+scale = Vector2(1.1425781, 1.1425781)
+texture = ExtResource("2_ul7y6")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1259726964]
+position = Vector2(-19, -30)
+scale = Vector2(0.19188704, 0.19188704)
+texture = ExtResource("2_kh24r")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=530161661]
+position = Vector2(-9, 49)
+shape = SubResource("CapsuleShape2D_cbp6q")
+
+[node name="Timer" type="Timer" parent="." unique_id=461630569]
+wait_time = 2.0
+autostart = true

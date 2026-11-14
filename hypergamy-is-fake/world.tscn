@@ -1,14 +1,25 @@
 [gd_scene format=3 uid="uid://bawmcf62c2yap"]
 
 [ext_resource type="PackedScene" uid="uid://c0gmd4l6hkg1d" path="res://player.tscn" id="1_f3sb7"]
+[ext_resource type="Script" uid="uid://ugcoi3lkrgkg" path="res://weapon_wheel.gd" id="2_cbp6q"]
 [ext_resource type="Texture2D" uid="uid://bvhkg1wha0pfi" path="res://sprites/low_cortisol.png" id="2_fj7yv"]
+[ext_resource type="Texture2D" uid="uid://bwrm33def6vbx" path="res://sprites/hammer.png" id="3_26xuy"]
 [ext_resource type="Texture2D" uid="uid://dnjd6mnuro5y2" path="res://sprites/wall_cross.png" id="3_dwbse"]
+[ext_resource type="Texture2D" uid="uid://c31ui4u86ix5q" path="res://sprites/shotgun.png" id="4_bc84e"]
 [ext_resource type="Texture2D" uid="uid://sotoxhqrwvmt" path="res://sprites/wall_corner.png" id="4_pkg7o"]
 [ext_resource type="Texture2D" uid="uid://u7nyiq1lqnk" path="res://sprites/wall_down.png" id="5_gbfbk"]
 [ext_resource type="Texture2D" uid="uid://cwlechlbyquai" path="res://sprites/concrete_black.png" id="5_ioo17"]
+[ext_resource type="Texture2D" uid="uid://bmcsmnw852wg1" path="res://sprites/watergun.png" id="5_wukud"]
+[ext_resource type="Texture2D" uid="uid://dfgjgrka8vo8" path="res://sprites/hypergamy.jpg" id="6_il2jm"]
 [ext_resource type="Texture2D" uid="uid://di1hsi22id7mq" path="res://sprites/wall_straight_g.png" id="6_ioo17"]
+[ext_resource type="AudioStream" uid="uid://b8hx23f6mlcip" path="res://sprites/item-select.mp3" id="7_26xuy"]
 [ext_resource type="Texture2D" uid="uid://bqfpp06qvas40" path="res://sprites/concrete_white.png" id="7_wse8f"]
 [ext_resource type="Texture2D" uid="uid://c4ol2gcrxsoxl" path="res://sprites/snow.png" id="8_ic0uy"]
+[ext_resource type="PackedScene" uid="uid://bbo12xh5pynwv" path="res://npc.tscn" id="10_wse8f"]
+[ext_resource type="PackedScene" uid="uid://bsfgc62pnobl3" path="res://npc_2.tscn" id="11_70uel"]
+[ext_resource type="PackedScene" uid="uid://crl3hq8fk5ti6" path="res://npc_3.tscn" id="12_hiqwa"]
+[ext_resource type="PackedScene" uid="uid://bvhap3fyukl4c" path="res://npc_4.tscn" id="13_2u3nc"]
+[ext_resource type="PackedScene" uid="uid://5y1nbsveuq53" path="res://npc_5.tscn" id="14_udxuc"]
 
 [sub_resource type="FontFile" id="FontFile_jqwnn"]
 cache/0/variation_coordinates = {}
@@ -48,22 +59,17 @@ font_color = Color(0, 0, 0, 1)
 [node name="World" type="Node2D" unique_id=319775989]
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1913116965]
-offset_left = -450.0
-offset_top = -131.0
-offset_right = 1764.876
-offset_bottom = 1342.0
+offset_left = -399.0
+offset_top = -128.0
+offset_right = 1815.876
+offset_bottom = 1345.0
 
 [node name="ColorRect2" type="ColorRect" parent="." unique_id=2039920024]
-offset_left = 1020.0
-offset_top = -746.0
-offset_right = 3234.876
-offset_bottom = 727.0
+offset_left = 1071.0
+offset_top = -743.0
+offset_right = 3285.876
+offset_bottom = 730.0
 color = Color(0, 1, 1, 1)
-
-[node name="Player" parent="." unique_id=1275611609 node_paths=PackedStringArray("cortisol_ui", "cortisol_label") instance=ExtResource("1_f3sb7")]
-position = Vector2(879, 518)
-cortisol_ui = NodePath("../CanvasLayer/TextureRect")
-cortisol_label = NodePath("../CanvasLayer/TextureRect/Label")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1715652402]
 
@@ -71,8 +77,10 @@ cortisol_label = NodePath("../CanvasLayer/TextureRect/Label")
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -346.5946
-offset_bottom = 229.0
+offset_left = -295.5946
+offset_top = 3.0
+offset_right = 51.0
+offset_bottom = 232.0
 grow_horizontal = 0
 size_flags_horizontal = 8
 size_flags_vertical = 0
@@ -90,9 +98,78 @@ offset_bottom = 57.0
 theme_override_fonts/font = SubResource("FontFile_jqwnn")
 label_settings = SubResource("LabelSettings_mbj86")
 
+[node name="WeaponWheel" type="Control" parent="CanvasLayer" unique_id=1140077928 node_paths=PackedStringArray("player_node")]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 850.0
+offset_top = 392.0
+offset_right = 1137.1915
+offset_bottom = 639.0
+focus_mode = 2
+script = ExtResource("2_cbp6q")
+player_node = NodePath("../../Player")
+
+[node name="TextureRect4" type="TextureRect" parent="CanvasLayer/WeaponWheel" unique_id=2111577705]
+layout_mode = 0
+offset_left = 148.0
+offset_top = 66.000015
+offset_right = 299.0
+offset_bottom = 280.25677
+pivot_offset = Vector2(50, 130)
+offset_transform_enabled = true
+offset_transform_rotation = 0.5235988
+texture = ExtResource("6_il2jm")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextureRect3" type="TextureRect" parent="CanvasLayer/WeaponWheel" unique_id=1421663805]
+layout_mode = 0
+offset_left = 7.000023
+offset_top = 89.0
+offset_right = 302.1784
+offset_bottom = 237.0
+scale = Vector2(1.0027837, 1)
+pivot_offset = Vector2(50, 130)
+offset_transform_enabled = true
+offset_transform_rotation = 1.7453293
+texture = ExtResource("4_bc84e")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextureRect2" type="TextureRect" parent="CanvasLayer/WeaponWheel" unique_id=2066754861]
+layout_mode = 0
+offset_left = -9.0
+offset_top = 64.0
+offset_right = 212.42708
+offset_bottom = 283.80847
+pivot_offset = Vector2(50, 130)
+offset_transform_enabled = true
+offset_transform_rotation = -4.6251225
+texture = ExtResource("5_wukud")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/WeaponWheel" unique_id=496785971]
+layout_mode = 0
+offset_left = -53.000015
+offset_top = 98.0
+offset_right = 168.15857
+offset_bottom = 317.80847
+pivot_offset = Vector2(50, 130)
+offset_transform_enabled = true
+offset_transform_rotation = -0.61086524
+texture = ExtResource("3_26xuy")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="CanvasLayer/WeaponWheel" unique_id=428803521]
+stream = ExtResource("7_26xuy")
+volume_db = -23.719
+
 [node name="Sprite2D4" type="Sprite2D" parent="." unique_id=175697050]
 texture_filter = 1
-position = Vector2(354, 362)
+position = Vector2(291, 249)
+scale = Vector2(2, 2)
 texture = ExtResource("3_dwbse")
 
 [node name="Sprite2D3" type="Sprite2D" parent="." unique_id=1254223863]
@@ -167,6 +244,25 @@ texture = ExtResource("5_gbfbk")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=146060346]
 texture_filter = 1
-position = Vector2(354, 298)
+position = Vector2(291, 121)
 rotation = 3.1415927
+scale = Vector2(2, 2)
 texture = ExtResource("5_gbfbk")
+
+[node name="Player" parent="." unique_id=1275611609 instance=ExtResource("1_f3sb7")]
+position = Vector2(450, 913)
+
+[node name="NPC2" parent="." unique_id=1520599775 instance=ExtResource("10_wse8f")]
+position = Vector2(589, 867)
+
+[node name="NPC3" parent="." unique_id=707977642 instance=ExtResource("11_70uel")]
+position = Vector2(328, 891)
+
+[node name="NPC" parent="." unique_id=1640683601 instance=ExtResource("12_hiqwa")]
+position = Vector2(738, 867)
+
+[node name="NPC4" parent="." unique_id=1759483975 instance=ExtResource("13_2u3nc")]
+position = Vector2(892, 840)
+
+[node name="NPC5" parent="." unique_id=663719395 instance=ExtResource("14_udxuc")]
+position = Vector2(1058, 856)
