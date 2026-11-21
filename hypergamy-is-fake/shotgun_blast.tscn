@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://du7bryuqe0m1j"]
+
+[ext_resource type="Script" uid="uid://dpnp1w7y2hueg" path="res://shotgun_blast.gd" id="1_bqf0b"]
+
+[node name="ShotgunBlast" type="Node2D" unique_id=1721809773]
+script = ExtResource("1_bqf0b")
+
+[node name="LinesContainer" type="Node2D" parent="." unique_id=1521703648]
+
+[node name="MuzzleFlash" type="Polygon2D" parent="." unique_id=1203025064]
+position = Vector2(-50, -3)
+scale = Vector2(1.25, 1.25)
+color = Color(0.9999997, 0.79259396, 0.3518446, 1)
+polygon = PackedVector2Array(32, 2, 36, -6, 43, -8, 48, 1, 44, 2, 51, 5, 46, 7, 40, 9, 38, 12)

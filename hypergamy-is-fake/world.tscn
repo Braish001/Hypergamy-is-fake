@@ -5,24 +5,30 @@
 [ext_resource type="Texture2D" uid="uid://bvhkg1wha0pfi" path="res://sprites/low_cortisol.png" id="2_fj7yv"]
 [ext_resource type="Texture2D" uid="uid://bwrm33def6vbx" path="res://sprites/hammer.png" id="3_26xuy"]
 [ext_resource type="Texture2D" uid="uid://dnjd6mnuro5y2" path="res://sprites/wall_cross.png" id="3_dwbse"]
+[ext_resource type="Texture2D" uid="uid://cuptejifhwy8r" path="res://sprites/documents.png" id="3_wukud"]
 [ext_resource type="Texture2D" uid="uid://c31ui4u86ix5q" path="res://sprites/shotgun.png" id="4_bc84e"]
 [ext_resource type="Texture2D" uid="uid://sotoxhqrwvmt" path="res://sprites/wall_corner.png" id="4_pkg7o"]
 [ext_resource type="Texture2D" uid="uid://u7nyiq1lqnk" path="res://sprites/wall_down.png" id="5_gbfbk"]
 [ext_resource type="Texture2D" uid="uid://cwlechlbyquai" path="res://sprites/concrete_black.png" id="5_ioo17"]
 [ext_resource type="Texture2D" uid="uid://bmcsmnw852wg1" path="res://sprites/watergun.png" id="5_wukud"]
-[ext_resource type="Texture2D" uid="uid://dfgjgrka8vo8" path="res://sprites/hypergamy.jpg" id="6_il2jm"]
 [ext_resource type="Texture2D" uid="uid://di1hsi22id7mq" path="res://sprites/wall_straight_g.png" id="6_ioo17"]
 [ext_resource type="AudioStream" uid="uid://bxd610nax0aey" path="res://sounds/item-select.mp3" id="7_26xuy"]
 [ext_resource type="Texture2D" uid="uid://bqfpp06qvas40" path="res://sprites/concrete_white.png" id="7_wse8f"]
 [ext_resource type="Texture2D" uid="uid://c4ol2gcrxsoxl" path="res://sprites/snow.png" id="8_ic0uy"]
+[ext_resource type="Shader" uid="uid://cu3twhcxrrp6h" path="res://world.gdshader" id="8_wukud"]
+[ext_resource type="PackedScene" uid="uid://cnd24ltbtoic3" path="res://npc6.tscn" id="9_mc2jv"]
+[ext_resource type="PackedScene" uid="uid://cqiso0ty2tn2x" path="res://npc7.tscn" id="10_bo7i5"]
 [ext_resource type="PackedScene" uid="uid://bbo12xh5pynwv" path="res://npc.tscn" id="10_wse8f"]
 [ext_resource type="PackedScene" uid="uid://bsfgc62pnobl3" path="res://npc_2.tscn" id="11_70uel"]
 [ext_resource type="PackedScene" uid="uid://crl3hq8fk5ti6" path="res://npc_3.tscn" id="12_hiqwa"]
 [ext_resource type="PackedScene" uid="uid://bvhap3fyukl4c" path="res://npc_4.tscn" id="13_2u3nc"]
 [ext_resource type="PackedScene" uid="uid://5y1nbsveuq53" path="res://npc_5.tscn" id="14_udxuc"]
 [ext_resource type="AudioStream" uid="uid://cyjpfawwnp3oy" path="res://sounds/bonesmash.mp3" id="16_bc84e"]
+[ext_resource type="PackedScene" uid="uid://bbfewc6mfi8w4" path="res://water_stream.tscn" id="17_il2jm"]
+[ext_resource type="PackedScene" uid="uid://du7bryuqe0m1j" path="res://shotgun_blast.tscn" id="18_4h6ng"]
+[ext_resource type="PackedScene" uid="uid://dck8x7lqfrqh1" path="res://ammo_pickup.tscn" id="27_o3ebs"]
 
-[sub_resource type="FontFile" id="FontFile_jqwnn"]
+[sub_resource type="FontFile" id="FontFile_wjb0r"]
 cache/0/variation_coordinates = {}
 cache/0/face_index = 0
 cache/0/embolden = 0.0
@@ -37,16 +43,6 @@ cache/0/16/0/descent = 0.0
 cache/0/16/0/underline_position = 0.0
 cache/0/16/0/underline_thickness = 0.0
 cache/0/16/0/scale = 1.0
-cache/0/24/0/ascent = 0.0
-cache/0/24/0/descent = 0.0
-cache/0/24/0/underline_position = 0.0
-cache/0/24/0/underline_thickness = 0.0
-cache/0/24/0/scale = 1.0
-cache/0/20/0/ascent = 0.0
-cache/0/20/0/descent = 0.0
-cache/0/20/0/underline_position = 0.0
-cache/0/20/0/underline_thickness = 0.0
-cache/0/20/0/scale = 1.0
 cache/0/28/0/ascent = 0.0
 cache/0/28/0/descent = 0.0
 cache/0/28/0/underline_position = 0.0
@@ -56,6 +52,10 @@ cache/0/28/0/scale = 1.0
 [sub_resource type="LabelSettings" id="LabelSettings_mbj86"]
 font_size = 28
 font_color = Color(0, 0, 0, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bc84e"]
+shader = ExtResource("8_wukud")
+shader_parameter/corner_radius = 0.0350000016625
 
 [node name="World" type="Node2D" unique_id=319775989]
 
@@ -96,15 +96,8 @@ offset_left = 246.0
 offset_top = 23.0
 offset_right = 387.0
 offset_bottom = 62.0
-theme_override_fonts/font = SubResource("FontFile_jqwnn")
+theme_override_fonts/font = SubResource("FontFile_wjb0r")
 label_settings = SubResource("LabelSettings_mbj86")
-
-[node name="BeautyLabel" type="Label" parent="CanvasLayer/TextureRect" unique_id=864286278]
-layout_mode = 0
-offset_left = 1042.0
-offset_top = -423.0
-offset_right = 1182.0
-offset_bottom = -363.0
 
 [node name="WeaponWheel" type="Control" parent="CanvasLayer" unique_id=1140077928 node_paths=PackedStringArray("player_node")]
 layout_mode = 3
@@ -119,14 +112,14 @@ player_node = NodePath("../../Player")
 
 [node name="TextureRect4" type="TextureRect" parent="CanvasLayer/WeaponWheel" unique_id=2111577705]
 layout_mode = 0
-offset_left = 148.0
-offset_top = 66.000015
-offset_right = 299.0
-offset_bottom = 280.25677
+offset_left = 112.0
+offset_top = 72.0
+offset_right = 293.0
+offset_bottom = 328.82434
 pivot_offset = Vector2(50, 130)
 offset_transform_enabled = true
-offset_transform_rotation = 0.5235988
-texture = ExtResource("6_il2jm")
+offset_transform_rotation = -0.87266463
+texture = ExtResource("3_wukud")
 expand_mode = 1
 stretch_mode = 5
 
@@ -173,6 +166,18 @@ stretch_mode = 5
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="CanvasLayer/WeaponWheel" unique_id=428803521]
 stream = ExtResource("7_26xuy")
 volume_db = -23.719
+
+[node name="BeautyTextureRect" type="TextureRect" parent="CanvasLayer" unique_id=141403734]
+material = SubResource("ShaderMaterial_bc84e")
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -145.0
+offset_top = 8.0
+offset_right = -14.0
+offset_bottom = 139.0
+grow_horizontal = 0
+expand_mode = 3
 
 [node name="Sprite2D4" type="Sprite2D" parent="." unique_id=175697050]
 texture_filter = 1
@@ -257,11 +262,15 @@ rotation = 3.1415927
 scale = Vector2(2, 2)
 texture = ExtResource("5_gbfbk")
 
-[node name="Player" parent="." unique_id=1275611609 node_paths=PackedStringArray("cortisol_ui", "cortisol_label") instance=ExtResource("1_f3sb7")]
-position = Vector2(450, 913)
+[node name="Player" parent="." unique_id=1275611609 node_paths=PackedStringArray("cortisol_ui", "cortisol_label", "beauty_ui") instance=ExtResource("1_f3sb7")]
+position = Vector2(-52, -36)
 cortisol_ui = NodePath("../CanvasLayer/TextureRect")
 cortisol_label = NodePath("../CanvasLayer/TextureRect/Label")
+beauty_ui = NodePath("../CanvasLayer/BeautyTextureRect")
+water_stream_scene = ExtResource("17_il2jm")
+shotgun_blast_scene = ExtResource("18_4h6ng")
 hit_sound = ExtResource("16_bc84e")
+weapon_textures = Array[Texture2D]([ExtResource("3_26xuy"), ExtResource("5_wukud"), ExtResource("4_bc84e"), ExtResource("3_wukud")])
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Player" unique_id=279663413]
 stream = ExtResource("16_bc84e")
@@ -273,7 +282,7 @@ position = Vector2(589, 867)
 [node name="NPC3" parent="." unique_id=707977642 instance=ExtResource("11_70uel")]
 position = Vector2(328, 891)
 
-[node name="NPC" parent="." unique_id=1640683601 instance=ExtResource("12_hiqwa")]
+[node name="NPC" parent="." unique_id=162464678 instance=ExtResource("12_hiqwa")]
 position = Vector2(738, 867)
 
 [node name="NPC4" parent="." unique_id=1759483975 instance=ExtResource("13_2u3nc")]
@@ -281,3 +290,27 @@ position = Vector2(892, 840)
 
 [node name="NPC5" parent="." unique_id=663719395 instance=ExtResource("14_udxuc")]
 position = Vector2(1058, 856)
+
+[node name="NPC7" parent="." unique_id=1640683601 instance=ExtResource("9_mc2jv")]
+position = Vector2(82, 967)
+
+[node name="NPC6" parent="." unique_id=1036181146 instance=ExtResource("10_bo7i5")]
+position = Vector2(-84, 954)
+
+[node name="AmmoPickup6" parent="." unique_id=1432397265 instance=ExtResource("27_o3ebs")]
+position = Vector2(513, -11)
+
+[node name="AmmoPickup5" parent="." unique_id=582763872 instance=ExtResource("27_o3ebs")]
+position = Vector2(563, 40)
+
+[node name="AmmoPickup4" parent="." unique_id=1539529947 instance=ExtResource("27_o3ebs")]
+position = Vector2(613, 91)
+
+[node name="AmmoPickup3" parent="." unique_id=529842819 instance=ExtResource("27_o3ebs")]
+position = Vector2(663, 142)
+
+[node name="AmmoPickup" parent="." unique_id=843070066 instance=ExtResource("27_o3ebs")]
+position = Vector2(553, 135)
+
+[node name="AmmoPickup2" parent="." unique_id=860348255 instance=ExtResource("27_o3ebs")]
+position = Vector2(581, 179)

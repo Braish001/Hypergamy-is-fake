@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://dck8x7lqfrqh1"]
+
+[ext_resource type="Script" uid="uid://d1uowkepqubt0" path="res://ammo_pickup.gd" id="1_hkks5"]
+[ext_resource type="Texture2D" uid="uid://ciwp8b5yqa1xm" path="res://sprites/ammobox.png" id="2_nxu3p"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_e6k2a"]
+radius = 20.09975
+
+[node name="AmmoPickup" type="Area2D" unique_id=1432397265]
+script = ExtResource("1_hkks5")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=404130259]
+position = Vector2(212.25, 202.75)
+scale = Vector2(0.066708244, 0.066708244)
+texture = ExtResource("2_nxu3p")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=820657712]
+position = Vector2(214, 205)
+shape = SubResource("CircleShape2D_e6k2a")

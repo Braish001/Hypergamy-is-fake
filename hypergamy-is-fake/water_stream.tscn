@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://bbfewc6mfi8w4"]
+
+[ext_resource type="Script" uid="uid://cgk3k7f2c5yxu" path="res://water_stream.gd" id="1_ayg5w"]
+
+[node name="WaterStream" type="Node2D" unique_id=14840876]
+script = ExtResource("1_ayg5w")
+
+[node name="StreamLine" type="Line2D" parent="." unique_id=982853685]
+points = PackedVector2Array(0, 0, 1500, 0)
+width = 7.0
+default_color = Color(0.42590645, 0.62580013, 1, 1)
+begin_cap_mode = 2
+end_cap_mode = 2

@@ -27,6 +27,27 @@ var is_hitting_self: bool = false
 var hit_cooldown_timer: float = 0.0         # Строгий кулдаун 3 секунды
 var current_hit_tween: Tween = null         # Переменная для контроля анимации удара
 
+# --- СТРЕЛЬБА: ВОДЯНОЙ ПИСТОЛЕТ (СЛОТ 1) ---
+@export var water_stream_scene: PackedScene
+@export var water_fire_cooldown: float = 0.08       # Частота выплеска при зажатии ЛКМ
+@export var water_muzzle_offset: Vector2 = Vector2(203.0, -31.0) # Смещение вправо от центра пистолета
+var water_cooldown_timer: float = 0.0
+
+# Заготовка на будущее: литры воды в водяном пистолете
+@export var max_water_liters: float = 10.0
+@export var water_per_shot: float = 0.1
+@export var consume_water_enabled: bool = false     # Включишь позже, когда понадобится ограничение литров
+var water_liters: float = 10.0
+
+# --- СТРЕЛЬБА: ДРОБОВИК (СЛОТ 2) ---
+@export var shotgun_blast_scene: PackedScene
+@export var shotgun_fire_cooldown: float = 0.45
+@export var shotgun_muzzle_offset: Vector2 = Vector2(300.0, -37.0)
+@export var max_shotgun_ammo: int = 2               # Максимум 2 патрона в дробовике
+var shotgun_ammo_in_mag: int = 0                    # Изначально 0 патронов в дробовике
+var reserve_shotgun_ammo: int = 0                   # Подобранные с карты патроны (ждут зарядки на R)
+var shotgun_cooldown_timer: float = 0.0
+
 @export var hit_sound: AudioStream          # Файл звука удара
 @onready var audio_stream_player: AudioStreamPlayer = $AudioStreamPlayer
 
@@ -47,7 +68,7 @@ var current_weapon_slot: int = -1
 
 var weapon_scales: Array[Vector2] = [
 	Vector2(0.32, 0.32),   # Слот 0 (Молоток)
-	Vector2(0.37, 0.37),   # Слот 1 (Пистолет)
+	Vector2(0.37, 0.37),   # Слот 1 (Водяной пистолет)
 	Vector2(0.47, 0.47),   # Слот 2 (Дробовик)
 	Vector2(0.2, 0.2)      # Слот 3 (Фотоальбом)
 ]
@@ -75,10 +96,14 @@ var weapon_flip_h: Array[bool] = [
 
 
 func _ready() -> void:
+	water_liters = max_water_liters
+	shotgun_ammo_in_mag = 0
+	reserve_shotgun_ammo = 0
+
 	var img = Image.load_from_file("res://sprites/cursor_game.png")
 	img.resize(48, 48, Image.INTERPOLATE_BILINEAR)
 	var scaled_cursor = ImageTexture.create_from_image(img)
-	Input.set_custom_mouse_cursor(scaled_cursor, Input.CURSOR_ARROW, Vector2(16, 2.1))
+	Input.set_custom_mouse_cursor(scaled_cursor, Input.CURSOR_ARROW, Vector2(21, 15))
 
 	cortisol_stages = [
 		load("res://sprites/low_cortisol.png"),             
@@ -86,6 +111,13 @@ func _ready() -> void:
 		load("res://sprites/normal_cortisol.png"),          
 		load("res://sprites/below_high_cortisol.png"),      
 		load("res://sprites/high_cortisol.png")             
+	]
+
+	beauty_stages = [
+		load("res://sprites/sub_look.png"),
+		load("res://sprites/ltn_look.png"),
+		load("res://sprites/chad_look.png"),
+		load("res://sprites/adam_look.png")
 	]
 	
 	update_cortisol_display()
@@ -114,6 +146,17 @@ func _physics_process(delta: float) -> void:
 	# 3. Кулдаун удара молотком (уменьшается каждый кадр)
 	if hit_cooldown_timer > 0:
 		hit_cooldown_timer -= delta
+
+	# 3.1. Кулдаун водяного пистолета и постоянная стрельба при зажатии ЛКМ
+	if water_cooldown_timer > 0:
+		water_cooldown_timer -= delta
+
+	if current_weapon_slot == 1 and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and water_cooldown_timer <= 0:
+		shoot_water_pistol()
+
+	# 3.2. Кулдаун дробовика
+	if shotgun_cooldown_timer > 0:
+		shotgun_cooldown_timer -= delta
 
 	# 4. Таймер перезарядки рывка
 	if cooldown_time_left > 0:
@@ -148,11 +191,110 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-# Обработка клика ЛКМ для удара молотком
+# Обработка одиночного клика ЛКМ для молотка/дробовика и клавиши R для перезарядки
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_R:
+			reload_shotgun()
+
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if current_weapon_slot == 0 and not is_hitting_self and hit_cooldown_timer <= 0:
 			start_self_hit()
+		elif current_weapon_slot == 2 and shotgun_cooldown_timer <= 0:
+			shoot_shotgun()
+
+func collect_shotgun_ammo(amount: int = 1) -> bool:
+	# Нельзя брать больше максимума (2 патрона на весь дробовик)
+	var total_owned = shotgun_ammo_in_mag + reserve_shotgun_ammo
+	if total_owned >= max_shotgun_ammo:
+		print("Лимит патронов дробовика уже достигнут (", max_shotgun_ammo, ")")
+		return false
+	
+	var can_add = min(amount, max_shotgun_ammo - total_owned)
+	reserve_shotgun_ammo += can_add
+	print("Подобрано патронов: +", can_add, " | В запасе (нужно зарядить на R): ", reserve_shotgun_ammo, " | В стволе: ", shotgun_ammo_in_mag)
+	return true
+
+func reload_shotgun() -> void:
+	if shotgun_ammo_in_mag >= max_shotgun_ammo:
+		print("Дробовик уже полон: ", shotgun_ammo_in_mag, "/", max_shotgun_ammo)
+		return
+	if reserve_shotgun_ammo <= 0:
+		print("Нет патронов в запасе для зарядки!")
+		return
+	
+	var needed = max_shotgun_ammo - shotgun_ammo_in_mag
+	var loaded = min(needed, reserve_shotgun_ammo)
+	shotgun_ammo_in_mag += loaded
+	reserve_shotgun_ammo -= loaded
+	print("Заряжено патронов: +", loaded, " | В дробовике: ", shotgun_ammo_in_mag, "/", max_shotgun_ammo)
+
+func shoot_shotgun() -> void:
+	if shotgun_ammo_in_mag <= 0:
+		print("Дробовик разряжен! Подбери патроны и нажми R.")
+		return
+	if shotgun_blast_scene == null:
+		push_warning("Не назначен shotgun_blast_scene в инспекторе игрока!")
+		return
+	
+	shotgun_ammo_in_mag -= 1
+	shotgun_cooldown_timer = shotgun_fire_cooldown
+	print("Выстрел из дробовика! Осталось в стволе: ", shotgun_ammo_in_mag, "/", max_shotgun_ammo)
+	
+	var start_pos: Vector2 = global_position + shotgun_muzzle_offset
+	if held_item_sprite != null and held_item_sprite.visible:
+		var local_tip = shotgun_muzzle_offset
+		if held_item_sprite.flip_v:
+			local_tip.y = -local_tip.y
+		start_pos = held_item_sprite.to_global(local_tip)
+	
+	var mouse_pos: Vector2 = get_global_mouse_position()
+	var blast_instance = shotgun_blast_scene.instantiate()
+	
+	var parent_node = get_parent() if get_parent() != null else get_tree().current_scene
+	parent_node.add_child(blast_instance)
+	
+	if blast_instance.has_method("setup"):
+		blast_instance.setup(start_pos, mouse_pos, self, shotgun_muzzle_offset)
+
+# Заготовка на будущее: реакция игрока/игры при попадании дробовика по NPC
+func _on_shotgun_hit_npc(npc_node: Node, _hit_pos: Vector2) -> void:
+	print("Игрок попал из дробовика по NPC: ", npc_node.name)
+
+func shoot_water_pistol() -> void:
+	if water_stream_scene == null:
+		push_warning("Не назначен water_stream_scene в инспекторе игрока!")
+		return
+
+	# Заготовка под ограничение литров воды
+	if consume_water_enabled:
+		if water_liters <= 0.0:
+			return
+		water_liters = max(0.0, water_liters - water_per_shot)
+	
+	water_cooldown_timer = water_fire_cooldown
+	
+	var start_pos: Vector2 = global_position + water_muzzle_offset
+	if held_item_sprite != null and held_item_sprite.visible:
+		var local_tip = water_muzzle_offset
+		if held_item_sprite.flip_v:
+			local_tip.y = -local_tip.y
+		start_pos = held_item_sprite.to_global(local_tip)
+	
+	var mouse_pos: Vector2 = get_global_mouse_position()
+	var stream_instance = water_stream_scene.instantiate()
+	
+	# Спавним струю в родительском узле (например, в World), а внутри самой струи обновляем её координаты вместе с игроком
+	var parent_node = get_parent() if get_parent() != null else get_tree().current_scene
+	parent_node.add_child(stream_instance)
+	
+	if stream_instance.has_method("setup"):
+		stream_instance.setup(start_pos, mouse_pos, self, water_muzzle_offset)
+
+# Заготовка на будущее: реакция игрока/игры при попадании воды по NPC
+func _on_water_hit_npc(npc_node: Node, _hit_pos: Vector2) -> void:
+	# Сюда можно будет добавить эффекты для игрока (например, изменение кортизола/красоты или счётчик)
+	print("Игрок попал из водяного пистолета по NPC: ", npc_node.name)
 
 func start_self_hit() -> void:
 	is_hitting_self = true
@@ -240,6 +382,10 @@ func update_cortisol_display() -> void:
 func update_beauty_display() -> void:
 	var stage_index = int(beauty / 25)
 	stage_index = clamp(stage_index, 0, 3)
+	
+	if beauty_ui != null and beauty_stages.size() > stage_index:
+		if beauty_stages[stage_index] != null:
+			beauty_ui.texture = beauty_stages[stage_index]
 	
 	var rank_names = ["Sub3", "LTN", "Chad", "True Adam"]
 	print("Красота: ", beauty, " | Ранг: ", rank_names[stage_index])
