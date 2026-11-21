@@ -265,7 +265,7 @@ hit_sound = ExtResource("16_bc84e")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Player" unique_id=279663413]
 stream = ExtResource("16_bc84e")
-volume_db = -19.113
+volume_db = -29.203
 
 [node name="NPC2" parent="." unique_id=1520599775 instance=ExtResource("10_wse8f")]
 position = Vector2(589, 867)
