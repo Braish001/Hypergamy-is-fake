@@ -2,6 +2,7 @@ extends Node2D
 
 @onready var line: Line2D = $StreamLine
 
+@export var max_range: float = 450.0 # Максимальная дальность струи водяного пистолета
 @export var lifetime: float = 0.14
 @export var water_amount: float = 10.0
 
@@ -29,13 +30,22 @@ func _get_current_muzzle_pos(fallback_pos: Vector2) -> Vector2:
 		return shooter.global_position + muzzle_local_offset
 	return fallback_pos
 
+func _clamp_aim_to_range(from_pos: Vector2, aim_world_pos: Vector2) -> Vector2:
+	var to_aim = aim_world_pos - from_pos
+	var dist = to_aim.length()
+	if dist < 1.0:
+		return from_pos + Vector2.RIGHT * max_range
+	if dist > max_range:
+		return from_pos + (to_aim / dist) * max_range
+	return aim_world_pos
+
 func _update_stream(from_pos: Vector2, aim_world_pos: Vector2) -> void:
 	global_position = from_pos
-	var end_pos: Vector2 = aim_world_pos
+	var end_pos: Vector2 = _clamp_aim_to_range(from_pos, aim_world_pos)
 
 	var space_state = get_world_2d().direct_space_state
-	if space_state != null and from_pos.distance_to(aim_world_pos) > 1.0:
-		var query = PhysicsRayQueryParameters2D.create(from_pos, aim_world_pos)
+	if space_state != null and from_pos.distance_to(end_pos) > 1.0:
+		var query = PhysicsRayQueryParameters2D.create(from_pos, end_pos)
 		if shooter is CollisionObject2D:
 			query.exclude = [shooter.get_rid()]
 

@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://byd2xvmqbd68p"]
+
+[ext_resource type="Script" uid="uid://dj3d2mbmsxpk" path="res://album_range.gd" id="1_xvyc0"]
+
+[node name="AlbumRange" type="Node2D" unique_id=955237191]
+script = ExtResource("1_xvyc0")
+
+[node name="SectorPolygon" type="Polygon2D" parent="." unique_id=2072047422]

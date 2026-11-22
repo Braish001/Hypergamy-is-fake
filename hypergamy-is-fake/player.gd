@@ -48,6 +48,15 @@ var shotgun_ammo_in_mag: int = 0                    # Изначально 0 п�
 var reserve_shotgun_ammo: int = 0                   # Подобранные с карты патроны (ждут зарядки на R)
 var shotgun_cooldown_timer: float = 0.0
 
+# --- ФОТОАЛЬБОМ (СЛОТ 3) ---
+@export var album_range_scene: PackedScene
+@export var album_meme_ui: TextureRect              # Картинка по центру экрана
+@export var album_range_duration: float = 0.7       # Красный сектор 1/3 круга — 0.7 сек
+@export var album_meme_duration: float = 1.0        # Случайная фотка по центру — 1 сек
+var album_memes: Array[Texture2D] = []
+var is_album_active: bool = false
+var _meme_hide_timer: float = 0.0
+
 @export var hit_sound: AudioStream          # Файл звука удара
 @onready var audio_stream_player: AudioStreamPlayer = $AudioStreamPlayer
 
@@ -96,6 +105,7 @@ var weapon_flip_h: Array[bool] = [
 
 
 func _ready() -> void:
+	randomize()
 	water_liters = max_water_liters
 	shotgun_ammo_in_mag = 0
 	reserve_shotgun_ammo = 0
@@ -119,6 +129,21 @@ func _ready() -> void:
 		load("res://sprites/chad_look.png"),
 		load("res://sprites/adam_look.png")
 	]
+
+	album_memes = [
+		load("res://sprites/photo_1.png"),
+		load("res://sprites/photo_2.jpg"),
+		load("res://sprites/photo_3.jpeg"),
+		load("res://sprites/photo_4.png"),
+		load("res://sprites/photo_5.png"),
+		load("res://sprites/photo_6.jpg"),
+		load("res://sprites/photo_7.jpg"),
+		load("res://sprites/photo_8.png"),
+		load("res://sprites/photo_9.png")
+	]
+
+	if album_meme_ui != null:
+		album_meme_ui.visible = false
 	
 	update_cortisol_display()
 	update_beauty_display()
@@ -158,6 +183,14 @@ func _physics_process(delta: float) -> void:
 	if shotgun_cooldown_timer > 0:
 		shotgun_cooldown_timer -= delta
 
+	# 3.3. Таймер скрытия картинки альбома по центру экрана (1 сек)
+	if _meme_hide_timer > 0.0:
+		_meme_hide_timer -= delta
+		if _meme_hide_timer <= 0.0:
+			if album_meme_ui != null:
+				album_meme_ui.visible = false
+			is_album_active = false
+
 	# 4. Таймер перезарядки рывка
 	if cooldown_time_left > 0:
 		cooldown_time_left -= delta
@@ -191,7 +224,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-# Обработка одиночного клика ЛКМ для молотка/дробовика и клавиши R для перезарядки
+# Обработка одиночного клика ЛКМ для молотка/дробовика/альбома и клавиши R для перезарядки
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_R:
@@ -202,6 +235,48 @@ func _input(event: InputEvent) -> void:
 			start_self_hit()
 		elif current_weapon_slot == 2 and shotgun_cooldown_timer <= 0:
 			shoot_shotgun()
+		elif current_weapon_slot == 3 and not is_album_active:
+			use_photo_album()
+
+func use_photo_album() -> void:
+	if album_range_scene == null:
+		push_warning("Не назначен album_range_scene в инспекторе игрока!")
+		return
+	
+	is_album_active = true
+	var range_instance = album_range_scene.instantiate()
+	range_instance.duration = album_range_duration
+	
+	var parent_node = get_parent() if get_parent() != null else get_tree().current_scene
+	parent_node.add_child(range_instance)
+	
+	if range_instance.has_signal("finished_range"):
+		range_instance.finished_range.connect(_on_album_range_finished)
+	
+	if range_instance.has_method("setup"):
+		range_instance.setup(global_position, get_global_mouse_position(), self)
+
+func _on_album_range_finished(triggered_any_npc: bool) -> void:
+	_on_album_effect_applied(triggered_any_npc)
+	_show_random_album_meme()
+
+# Заготовка на будущее: реакция игрока/игры после завершения показа зоны альбома
+func _on_album_effect_applied(triggered_any_npc: bool) -> void:
+	print("Зона альбома отработала. Задет NPC: ", triggered_any_npc)
+
+func _show_random_album_meme() -> void:
+	var valid_memes: Array[Texture2D] = []
+	for tex in album_memes:
+		if tex != null:
+			valid_memes.append(tex)
+	
+	if album_meme_ui != null and valid_memes.size() > 0:
+		var chosen_tex = valid_memes[randi() % valid_memes.size()]
+		album_meme_ui.texture = chosen_tex
+		album_meme_ui.visible = true
+		_meme_hide_timer = album_meme_duration
+	else:
+		is_album_active = false
 
 func collect_shotgun_ammo(amount: int = 1) -> bool:
 	# Нельзя брать больше максимума (2 патрона на весь дробовик)

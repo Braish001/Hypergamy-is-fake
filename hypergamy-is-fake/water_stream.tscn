@@ -4,6 +4,7 @@
 
 [node name="WaterStream" type="Node2D" unique_id=14840876]
 script = ExtResource("1_ayg5w")
+max_range = 2000.0
 
 [node name="StreamLine" type="Line2D" parent="." unique_id=982853685]
 points = PackedVector2Array(0, 0, 1500, 0)

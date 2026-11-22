@@ -4,7 +4,7 @@ extends Node2D
 @onready var muzzle_flash: CanvasItem = $MuzzleFlash
 
 @export var pellet_count: int = 9              # 8-9 дробинок/линий
-@export var max_range: float = 930.0           # Увеличено в ~1.5 раза (было 620.0)
+@export var max_range: float = 1240           # Увеличено в ~1.5 раза (было 620.0)
 @export var spread_degrees: float = 54.0       # Широкий разброс вверх/вниз по вееру
 @export var blast_lifetime: float = 0.24       # Длительность отображения линий и точек
 @export var flash_duration: float = 0.1        # Свечение у дула 0.1 секунды
@@ -94,7 +94,7 @@ func _rebuild_pellets(start_pos: Vector2) -> void:
 		# Линия дробинки
 		var line = Line2D.new()
 		line.points = PackedVector2Array([Vector2.ZERO, local_end])
-		line.width = 3.0
+		line.width = 6.0
 		line.default_color = Color(1.0, 0.92, 0.65, 0.95)
 		line.begin_cap_mode = Line2D.LINE_CAP_ROUND
 		line.end_cap_mode = Line2D.LINE_CAP_ROUND
@@ -174,7 +174,7 @@ func _resolve_npc_node(collider: Object) -> Node:
 func _create_tip_dot(local_pos: Vector2) -> Polygon2D:
 	var dot = Polygon2D.new()
 	var pts = PackedVector2Array()
-	var radius = 4.0
+	var radius = 8.0
 	var segments = 8
 	for s in range(segments):
 		var a = (TAU / segments) * s
