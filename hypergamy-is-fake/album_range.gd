@@ -2,7 +2,7 @@ extends Node2D
 
 @onready var sector_polygon: Polygon2D = $SectorPolygon
 
-@export var radius: float = 600               # Радиус зоны действия альбома
+@export var radius: float = 900               # Радиус зоны действия альбома
 @export var duration: float = 0.7               # Показывается ровно 0.7 секунды
 @export var sector_color: Color = Color(1.0, 0.15, 0.15, 0.35) # Полупрозрачный красный
 

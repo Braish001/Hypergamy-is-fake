@@ -47,9 +47,13 @@ var water_hold_drain_timer: float = 0.0
 @export var shotgun_fire_cooldown: float = 0.45
 @export var shotgun_muzzle_offset: Vector2 = Vector2(300.0, -37.0)
 @export var max_shotgun_ammo: int = 2               # Максимум 2 патрона в дробовике
+@export var max_reserve_shotgun_ammo: int = 2       # Максимум 2 патрона можно хранить у себя в запасе
+@export var shotgun_reload_duration: float = 0.35   # Длительность быстрой зарядки 1 патрона (под будущую анимку)
 var shotgun_ammo_in_mag: int = 0                    # Изначально 0 патронов в дробовике
-var reserve_shotgun_ammo: int = 0                   # Подобранные с карты патроны (ждут зарядки на R)
+var reserve_shotgun_ammo: int = 0                   # Подобранные с карты патроны (до 2 штук у себя)
 var shotgun_cooldown_timer: float = 0.0
+var shotgun_reload_timer: float = 0.0
+var is_reloading_shotgun: bool = false
 
 @export var shotgun_shot_sound: AudioStream          # Краткий звук выстрела
 @export var shotgun_shot_volume_db: float = -8.0     # Приглушение громкого выстрела
@@ -57,19 +61,20 @@ var shotgun_cooldown_timer: float = 0.0
 @export var ringing_duration: float = 5.5            # Длительность затухания (5-6 сек)
 @export var ringing_start_db: float = -6.0           # Громкость звона в момент выстрела
 @export var ringing_min_db: float = -45.0          # Почти тишина к концу затухания
-@export var camera_shake_strength: float = 4.0       # Малюсенькая тряска экрана (в пикселях)
-@export var camera_shake_duration: float = 0.09      # Очень короткая тряска
+@export var camera_shake_strength: float = 100       # Заметная тряска экрана (в пикселях)
+@export var camera_shake_duration: float = 0.18      # Длительность тряски
 
 @onready var shotgun_shot_player: AudioStreamPlayer = $ShotgunShotPlayer
 @onready var ringing_player: AudioStreamPlayer = $RingingPlayer
 
-var _ringing_timer: float = 0.0
+var _active_ringings: Array[Dictionary] = []
 var _shake_timer: float = 0.0
-var _camera_base_offset: Vector2 = Vector2.ZERO
+var _last_shake_jitter: Vector2 = Vector2.ZERO
 var _active_camera: Camera2D = null
 
 @export var shotgun_hud: CanvasItem
 @export var shotgun_ammo_label: Label
+@export var shotgun_reserve_label: Label
 
 # --- ФОТОАЛЬБОМ (СЛОТ 3) ---
 @export var album_range_scene: PackedScene
@@ -139,6 +144,8 @@ func _ready() -> void:
 	water_hold_drain_timer = 0.0
 	shotgun_ammo_in_mag = 0
 	reserve_shotgun_ammo = 0
+	shotgun_reload_timer = 0.0
+	is_reloading_shotgun = false
 	album_cooldown_left = 0.0
 
 	var img = Image.load_from_file("res://sprites/cursor_game.png")
@@ -229,9 +236,16 @@ func _physics_process(delta: float) -> void:
 	else:
 		water_hold_drain_timer = 0.0
 
-	# 3.2. Кулдаун дробовика
+	# 3.2. Кулдаун и таймер быстрой зарядки 1 патрона дробовика
 	if shotgun_cooldown_timer > 0:
 		shotgun_cooldown_timer -= delta
+
+	if is_reloading_shotgun:
+		shotgun_reload_timer -= delta
+		if shotgun_reload_timer <= 0.0:
+			shotgun_reload_timer = 0.0
+			is_reloading_shotgun = false
+			_on_shotgun_single_shell_reloaded()
 
 	# 3.3. Таймер скрытия картинки альбома по центру экрана (1 сек)
 	if _meme_hide_timer > 0.0:
@@ -344,33 +358,47 @@ func _show_random_album_meme() -> void:
 		is_album_active = false
 
 func collect_shotgun_ammo(amount: int = 1) -> bool:
-	# Нельзя брать больше максимума (2 патрона на весь дробовик)
-	var total_owned = shotgun_ammo_in_mag + reserve_shotgun_ammo
-	if total_owned >= max_shotgun_ammo:
-		print("Лимит патронов дробовика уже достигнут (", max_shotgun_ammo, ")")
+	# У себя можно хранить до max_reserve_shotgun_ammo (2 патрона) независимо от патронов в самом дробовике
+	if reserve_shotgun_ammo >= max_reserve_shotgun_ammo:
+		print("Лимит патронов у себя уже достигнут (", max_reserve_shotgun_ammo, ")")
 		return false
 	
-	var can_add = min(amount, max_shotgun_ammo - total_owned)
+	var can_add: int = mini(amount, max_reserve_shotgun_ammo - reserve_shotgun_ammo)
 	reserve_shotgun_ammo += can_add
-	print("Подобрано патронов: +", can_add, " | В запасе (нужно зарядить на R): ", reserve_shotgun_ammo, " | В стволе: ", shotgun_ammo_in_mag)
+	update_shotgun_hud()
+	print("Подобрано патронов: +", can_add, " | У себя в запасе: ", reserve_shotgun_ammo, "/", max_reserve_shotgun_ammo, " | В дробовике: ", shotgun_ammo_in_mag, "/", max_shotgun_ammo)
 	return true
 
 func reload_shotgun() -> void:
+	if is_reloading_shotgun:
+		return
 	if shotgun_ammo_in_mag >= max_shotgun_ammo:
 		print("Дробовик уже полон: ", shotgun_ammo_in_mag, "/", max_shotgun_ammo)
 		return
 	if reserve_shotgun_ammo <= 0:
-		print("Нет патронов в запасе для зарядки!")
+		print("Нет патронов у себя для зарядки!")
 		return
 	
-	var needed = max_shotgun_ammo - shotgun_ammo_in_mag
-	var loaded = min(needed, reserve_shotgun_ammo)
-	shotgun_ammo_in_mag += loaded
-	reserve_shotgun_ammo -= loaded
+	# Заряжаем строго 1 патрон за нажатие R (быстрая зарядка, сюда позже добавим анимацию)
+	reserve_shotgun_ammo -= 1
+	shotgun_ammo_in_mag += 1
 	update_shotgun_hud()
-	print("Заряжено патронов: +", loaded, " | В дробовике: ", shotgun_ammo_in_mag, "/", max_shotgun_ammo)
+	is_reloading_shotgun = true
+	shotgun_reload_timer = shotgun_reload_duration
+	_play_single_shell_reload_anim_placeholder()
+	print("Заряжен 1 патрон! В дробовике: ", shotgun_ammo_in_mag, "/", max_shotgun_ammo, " | У себя в запасе: ", reserve_shotgun_ammo, "/", max_reserve_shotgun_ammo)
+
+func _play_single_shell_reload_anim_placeholder() -> void:
+	# Заготовка под быструю анимацию зарядки одного патрона
+	pass
+
+func _on_shotgun_single_shell_reloaded() -> void:
+	# Заготовка под завершение анимации зарядки одного патрона
+	pass
 
 func shoot_shotgun() -> void:
+	if is_reloading_shotgun:
+		return
 	if shotgun_ammo_in_mag <= 0:
 		print("Дробовик разряжен! Подбери патроны и нажми R.")
 		return
@@ -407,11 +435,11 @@ func _play_shotgun_effects() -> void:
 		shotgun_shot_player.volume_db = shotgun_shot_volume_db
 		shotgun_shot_player.play()
 
-	# 2. Малюсенькая короткая тряска экрана
+	# 2. Тряска камеры после выстрела (без блокировки мотки камеры)
 	_trigger_tiny_camera_shake()
 
-	# 3. Звон в ушах на 5-6 сек без наложения (перезапускается с начала при повторном выстреле)
-	_start_or_restart_ringing()
+	# 3. Звон в ушах на 5-6 сек с наложением при повторных выстрелах
+	_spawn_overlapping_ringing()
 
 func _trigger_tiny_camera_shake() -> void:
 	var cam := get_viewport().get_camera_2d()
@@ -419,17 +447,23 @@ func _trigger_tiny_camera_shake() -> void:
 		return
 	if _active_camera != cam:
 		_active_camera = cam
-		_camera_base_offset = cam.offset
+		_last_shake_jitter = Vector2.ZERO
 	_shake_timer = camera_shake_duration
 
-func _start_or_restart_ringing() -> void:
-	if ringing_player == null or ringing_sound == null:
+func _spawn_overlapping_ringing() -> void:
+	if ringing_sound == null:
 		return
-	ringing_player.stop()
-	ringing_player.stream = ringing_sound
-	ringing_player.volume_db = ringing_start_db
-	_ringing_timer = ringing_duration
-	ringing_player.play()
+	var player := AudioStreamPlayer.new()
+	if ringing_player != null:
+		player.bus = ringing_player.bus
+	player.stream = ringing_sound
+	player.volume_db = ringing_start_db
+	add_child(player)
+	player.play()
+	_active_ringings.append({
+		"player": player,
+		"time_left": ringing_duration
+	})
 
 # Заготовка на будущее: реакция игрока/игры при попадании дробовика по NPC
 func _on_shotgun_hit_npc(npc_node: Node, _hit_pos: Vector2) -> void:
@@ -503,32 +537,39 @@ func start_self_hit() -> void:
 		is_hitting_self = false
 
 # Поведение оружия каждый кадр
-# Поведение оружия каждый кадр
 func _process(delta: float) -> void:
-	# Микротряска камеры после выстрела
-	if _shake_timer > 0.0:
-		_shake_timer = max(0.0, _shake_timer - delta)
-		if _active_camera != null and is_instance_valid(_active_camera):
+	# Тряска камеры поверх текущего offset (не мешает мотке камеры в разные стороны)
+	if _active_camera != null and is_instance_valid(_active_camera):
+		_active_camera.offset -= _last_shake_jitter
+		_last_shake_jitter = Vector2.ZERO
+
+		if _shake_timer > 0.0:
+			_shake_timer = max(0.0, _shake_timer - delta)
 			var progress: float = 1.0 - (_shake_timer / max(camera_shake_duration, 0.0001))
-			var current_mag: float = camera_shake_strength * (1.0 - progress)
-			var jitter := Vector2(
+			var decay: float = pow(1.0 - progress, 2.0)
+			var current_mag: float = camera_shake_strength * decay
+			_last_shake_jitter = Vector2(
 				randf_range(-current_mag, current_mag),
 				randf_range(-current_mag, current_mag)
 			)
-			_active_camera.offset = _camera_base_offset + jitter
-			if _shake_timer <= 0.0:
-				_active_camera.offset = _camera_base_offset
-	elif _active_camera != null and is_instance_valid(_active_camera):
-		_active_camera.offset = _camera_base_offset
+			_active_camera.offset += _last_shake_jitter
 
-	# Постепенное уменьшение звона в ушах на 5-6 секунд
-	if _ringing_timer > 0.0:
-		_ringing_timer = max(0.0, _ringing_timer - delta)
-		var elapsed_ratio: float = 1.0 - (_ringing_timer / max(ringing_duration, 0.001))
-		if ringing_player != null and ringing_player.playing:
-			ringing_player.volume_db = lerp(ringing_start_db, ringing_min_db, elapsed_ratio)
-		if _ringing_timer <= 0.0 and ringing_player != null:
-			ringing_player.stop()
+	# Постепенное уменьшение каждого активного звона в ушах
+	for i in range(_active_ringings.size() - 1, -1, -1):
+		var entry: Dictionary = _active_ringings[i]
+		var time_left: float = max(0.0, float(entry["time_left"]) - delta)
+		entry["time_left"] = time_left
+		var player: AudioStreamPlayer = entry["player"]
+		if player == null or not is_instance_valid(player):
+			_active_ringings.remove_at(i)
+			continue
+		var elapsed_ratio: float = 1.0 - (time_left / max(ringing_duration, 0.001))
+		if player.playing:
+			player.volume_db = lerp(ringing_start_db, ringing_min_db, elapsed_ratio)
+		if time_left <= 0.0:
+			player.stop()
+			player.queue_free()
+			_active_ringings.remove_at(i)
 
 	if held_item_sprite != null and held_item_sprite.visible and current_weapon_slot != -1:
 		held_item_sprite.scale = weapon_scales[current_weapon_slot]
@@ -581,6 +622,8 @@ func update_water_hud() -> void:
 func update_shotgun_hud() -> void:
 	if shotgun_ammo_label != null:
 		shotgun_ammo_label.text = str(shotgun_ammo_in_mag) + "/" + str(max_shotgun_ammo)
+	if shotgun_reserve_label != null:
+		shotgun_reserve_label.text = str(reserve_shotgun_ammo) + "/" + str(max_reserve_shotgun_ammo)
 
 func update_album_hud() -> void:
 	if album_status_label != null:
