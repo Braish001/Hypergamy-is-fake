@@ -33,11 +33,14 @@ var current_hit_tween: Tween = null         # Переменная для кон
 @export var water_muzzle_offset: Vector2 = Vector2(203.0, -31.0) # Смещение вправо от центра пистолета
 var water_cooldown_timer: float = 0.0
 
-# Заготовка на будущее: литры воды в водяном пистолете
-@export var max_water_liters: float = 10.0
-@export var water_per_shot: float = 0.1
-@export var consume_water_enabled: bool = false     # Включишь позже, когда понадобится ограничение литров
-var water_liters: float = 10.0
+# Вода (100/100L): при зажатии стрельбы тратится 1 литр раз в 5 секунд
+@export var max_water_liters: float = 100.0
+@export var water_hold_drain_interval: float = 5.0
+var water_liters: float = 100.0
+var water_hold_drain_timer: float = 0.0
+
+@export var water_hud: CanvasItem
+@export var water_amount_label: Label
 
 # --- СТРЕЛЬБА: ДРОБОВИК (СЛОТ 2) ---
 @export var shotgun_blast_scene: PackedScene
@@ -48,14 +51,40 @@ var shotgun_ammo_in_mag: int = 0                    # Изначально 0 п�
 var reserve_shotgun_ammo: int = 0                   # Подобранные с карты патроны (ждут зарядки на R)
 var shotgun_cooldown_timer: float = 0.0
 
+@export var shotgun_shot_sound: AudioStream          # Краткий звук выстрела
+@export var shotgun_shot_volume_db: float = -8.0     # Приглушение громкого выстрела
+@export var ringing_sound: AudioStream               # Звон в ушах
+@export var ringing_duration: float = 5.5            # Длительность затухания (5-6 сек)
+@export var ringing_start_db: float = -6.0           # Громкость звона в момент выстрела
+@export var ringing_min_db: float = -45.0          # Почти тишина к концу затухания
+@export var camera_shake_strength: float = 4.0       # Малюсенькая тряска экрана (в пикселях)
+@export var camera_shake_duration: float = 0.09      # Очень короткая тряска
+
+@onready var shotgun_shot_player: AudioStreamPlayer = $ShotgunShotPlayer
+@onready var ringing_player: AudioStreamPlayer = $RingingPlayer
+
+var _ringing_timer: float = 0.0
+var _shake_timer: float = 0.0
+var _camera_base_offset: Vector2 = Vector2.ZERO
+var _active_camera: Camera2D = null
+
+@export var shotgun_hud: CanvasItem
+@export var shotgun_ammo_label: Label
+
 # --- ФОТОАЛЬБОМ (СЛОТ 3) ---
 @export var album_range_scene: PackedScene
 @export var album_meme_ui: TextureRect              # Картинка по центру экрана
 @export var album_range_duration: float = 0.7       # Красный сектор 1/3 круга — 0.7 сек
 @export var album_meme_duration: float = 1.0        # Случайная фотка по центру — 1 сек
+@export var album_cooldown_duration: float = 12.0   # Отсчёт с 12 секунд после нажатия
 var album_memes: Array[Texture2D] = []
 var is_album_active: bool = false
 var _meme_hide_timer: float = 0.0
+var album_cooldown_left: float = 0.0
+var _last_shown_countdown: int = -1
+
+@export var album_hud: CanvasItem
+@export var album_status_label: Label
 
 @export var hit_sound: AudioStream          # Файл звука удара
 @onready var audio_stream_player: AudioStreamPlayer = $AudioStreamPlayer
@@ -107,8 +136,10 @@ var weapon_flip_h: Array[bool] = [
 func _ready() -> void:
 	randomize()
 	water_liters = max_water_liters
+	water_hold_drain_timer = 0.0
 	shotgun_ammo_in_mag = 0
 	reserve_shotgun_ammo = 0
+	album_cooldown_left = 0.0
 
 	var img = Image.load_from_file("res://sprites/cursor_game.png")
 	img.resize(48, 48, Image.INTERPOLATE_BILINEAR)
@@ -147,6 +178,10 @@ func _ready() -> void:
 	
 	update_cortisol_display()
 	update_beauty_display()
+	update_weapon_hud_visibility()
+	update_water_hud()
+	update_shotgun_hud()
+	update_album_hud()
 	
 	if held_item_sprite != null:
 		held_item_sprite.visible = false
@@ -172,12 +207,27 @@ func _physics_process(delta: float) -> void:
 	if hit_cooldown_timer > 0:
 		hit_cooldown_timer -= delta
 
-	# 3.1. Кулдаун водяного пистолета и постоянная стрельба при зажатии ЛКМ
+	# 3.1. Кулдаун водяного пистолета, стрельба при зажатии ЛКМ и трата 1 литра раз в 5 секунд зажатия
 	if water_cooldown_timer > 0:
 		water_cooldown_timer -= delta
 
-	if current_weapon_slot == 1 and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and water_cooldown_timer <= 0:
-		shoot_water_pistol()
+	var is_shooting_water := (
+		current_weapon_slot == 1
+		and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+		and water_liters > 0.0
+	)
+
+	if is_shooting_water:
+		if water_cooldown_timer <= 0:
+			shoot_water_pistol()
+
+		water_hold_drain_timer += delta
+		if water_hold_drain_timer >= water_hold_drain_interval:
+			water_hold_drain_timer -= water_hold_drain_interval
+			water_liters = max(0.0, water_liters - 1.0)
+			update_water_hud()
+	else:
+		water_hold_drain_timer = 0.0
 
 	# 3.2. Кулдаун дробовика
 	if shotgun_cooldown_timer > 0:
@@ -190,6 +240,17 @@ func _physics_process(delta: float) -> void:
 			if album_meme_ui != null:
 				album_meme_ui.visible = false
 			is_album_active = false
+
+	# 3.4. Обратный отсчёт альбома с 12 секунд (12, 11, 10 ... 2, 1 -> Ready for larp)
+	if album_cooldown_left > 0.0:
+		album_cooldown_left = max(0.0, album_cooldown_left - delta)
+		var shown_num := int(ceil(album_cooldown_left))
+		if shown_num != _last_shown_countdown:
+			_last_shown_countdown = shown_num
+			update_album_hud()
+		if album_cooldown_left <= 0.0:
+			_last_shown_countdown = -1
+			update_album_hud()
 
 	# 4. Таймер перезарядки рывка
 	if cooldown_time_left > 0:
@@ -235,7 +296,7 @@ func _input(event: InputEvent) -> void:
 			start_self_hit()
 		elif current_weapon_slot == 2 and shotgun_cooldown_timer <= 0:
 			shoot_shotgun()
-		elif current_weapon_slot == 3 and not is_album_active:
+		elif current_weapon_slot == 3 and not is_album_active and album_cooldown_left <= 0.0:
 			use_photo_album()
 
 func use_photo_album() -> void:
@@ -244,6 +305,10 @@ func use_photo_album() -> void:
 		return
 	
 	is_album_active = true
+	album_cooldown_left = album_cooldown_duration
+	_last_shown_countdown = int(ceil(album_cooldown_left))
+	update_album_hud()
+
 	var range_instance = album_range_scene.instantiate()
 	range_instance.duration = album_range_duration
 	
@@ -302,6 +367,7 @@ func reload_shotgun() -> void:
 	var loaded = min(needed, reserve_shotgun_ammo)
 	shotgun_ammo_in_mag += loaded
 	reserve_shotgun_ammo -= loaded
+	update_shotgun_hud()
 	print("Заряжено патронов: +", loaded, " | В дробовике: ", shotgun_ammo_in_mag, "/", max_shotgun_ammo)
 
 func shoot_shotgun() -> void:
@@ -314,6 +380,8 @@ func shoot_shotgun() -> void:
 	
 	shotgun_ammo_in_mag -= 1
 	shotgun_cooldown_timer = shotgun_fire_cooldown
+	update_shotgun_hud()
+	_play_shotgun_effects()
 	print("Выстрел из дробовика! Осталось в стволе: ", shotgun_ammo_in_mag, "/", max_shotgun_ammo)
 	
 	var start_pos: Vector2 = global_position + shotgun_muzzle_offset
@@ -332,6 +400,37 @@ func shoot_shotgun() -> void:
 	if blast_instance.has_method("setup"):
 		blast_instance.setup(start_pos, mouse_pos, self, shotgun_muzzle_offset)
 
+func _play_shotgun_effects() -> void:
+	# 1. Приглушённый краткий звук выстрела
+	if shotgun_shot_player != null and shotgun_shot_sound != null:
+		shotgun_shot_player.stream = shotgun_shot_sound
+		shotgun_shot_player.volume_db = shotgun_shot_volume_db
+		shotgun_shot_player.play()
+
+	# 2. Малюсенькая короткая тряска экрана
+	_trigger_tiny_camera_shake()
+
+	# 3. Звон в ушах на 5-6 сек без наложения (перезапускается с начала при повторном выстреле)
+	_start_or_restart_ringing()
+
+func _trigger_tiny_camera_shake() -> void:
+	var cam := get_viewport().get_camera_2d()
+	if cam == null:
+		return
+	if _active_camera != cam:
+		_active_camera = cam
+		_camera_base_offset = cam.offset
+	_shake_timer = camera_shake_duration
+
+func _start_or_restart_ringing() -> void:
+	if ringing_player == null or ringing_sound == null:
+		return
+	ringing_player.stop()
+	ringing_player.stream = ringing_sound
+	ringing_player.volume_db = ringing_start_db
+	_ringing_timer = ringing_duration
+	ringing_player.play()
+
 # Заготовка на будущее: реакция игрока/игры при попадании дробовика по NPC
 func _on_shotgun_hit_npc(npc_node: Node, _hit_pos: Vector2) -> void:
 	print("Игрок попал из дробовика по NPC: ", npc_node.name)
@@ -341,11 +440,8 @@ func shoot_water_pistol() -> void:
 		push_warning("Не назначен water_stream_scene в инспекторе игрока!")
 		return
 
-	# Заготовка под ограничение литров воды
-	if consume_water_enabled:
-		if water_liters <= 0.0:
-			return
-		water_liters = max(0.0, water_liters - water_per_shot)
+	if water_liters <= 0.0:
+		return
 	
 	water_cooldown_timer = water_fire_cooldown
 	
@@ -380,7 +476,7 @@ func start_self_hit() -> void:
 	if audio_stream_player != null:
 		if hit_sound != null:
 			audio_stream_player.stream = hit_sound
-		audio_stream_player.volume_db = linear_to_db(0.4)
+		audio_stream_player.volume_db = linear_to_db(0.14)
 		audio_stream_player.play()
 	
 	# Анимация через Tween: плавно выпрямляем молоток в 0 градусов и возвращаем назад
@@ -407,7 +503,33 @@ func start_self_hit() -> void:
 		is_hitting_self = false
 
 # Поведение оружия каждый кадр
-func _process(_delta: float) -> void:
+# Поведение оружия каждый кадр
+func _process(delta: float) -> void:
+	# Микротряска камеры после выстрела
+	if _shake_timer > 0.0:
+		_shake_timer = max(0.0, _shake_timer - delta)
+		if _active_camera != null and is_instance_valid(_active_camera):
+			var progress: float = 1.0 - (_shake_timer / max(camera_shake_duration, 0.0001))
+			var current_mag: float = camera_shake_strength * (1.0 - progress)
+			var jitter := Vector2(
+				randf_range(-current_mag, current_mag),
+				randf_range(-current_mag, current_mag)
+			)
+			_active_camera.offset = _camera_base_offset + jitter
+			if _shake_timer <= 0.0:
+				_active_camera.offset = _camera_base_offset
+	elif _active_camera != null and is_instance_valid(_active_camera):
+		_active_camera.offset = _camera_base_offset
+
+	# Постепенное уменьшение звона в ушах на 5-6 секунд
+	if _ringing_timer > 0.0:
+		_ringing_timer = max(0.0, _ringing_timer - delta)
+		var elapsed_ratio: float = 1.0 - (_ringing_timer / max(ringing_duration, 0.001))
+		if ringing_player != null and ringing_player.playing:
+			ringing_player.volume_db = lerp(ringing_start_db, ringing_min_db, elapsed_ratio)
+		if _ringing_timer <= 0.0 and ringing_player != null:
+			ringing_player.stop()
+
 	if held_item_sprite != null and held_item_sprite.visible and current_weapon_slot != -1:
 		held_item_sprite.scale = weapon_scales[current_weapon_slot]
 		var offset = weapon_offsets[current_weapon_slot]
@@ -440,6 +562,32 @@ func _process(_delta: float) -> void:
 			var target_angle = dir.angle() + deg_to_rad(weapon_base_rotations[current_weapon_slot])
 			held_item_sprite.rotation = target_angle
 			held_item_sprite.flip_h = weapon_flip_h[current_weapon_slot]
+
+# --- ОБНОВЛЕНИЕ HUD ПО ТЕКУЩЕМУ СЛОТУ ---
+func update_weapon_hud_visibility() -> void:
+	if water_hud != null:
+		water_hud.visible = (current_weapon_slot == 1)
+	if shotgun_hud != null:
+		shotgun_hud.visible = (current_weapon_slot == 2)
+	if album_hud != null:
+		album_hud.visible = (current_weapon_slot == 3)
+
+func update_water_hud() -> void:
+	if water_amount_label != null:
+		var max_val := int(round(max_water_liters))
+		var cur_val := clampi(int(floor(water_liters)), 0, max_val)
+		water_amount_label.text = str(cur_val) + "/" + str(max_val) + "L"
+
+func update_shotgun_hud() -> void:
+	if shotgun_ammo_label != null:
+		shotgun_ammo_label.text = str(shotgun_ammo_in_mag) + "/" + str(max_shotgun_ammo)
+
+func update_album_hud() -> void:
+	if album_status_label != null:
+		if album_cooldown_left > 0.0:
+			album_status_label.text = str(int(ceil(album_cooldown_left)))
+		else:
+			album_status_label.text = "Ready for larp"
 
 # Обновление UI кортизола
 func update_cortisol_display() -> void:
@@ -474,6 +622,7 @@ func equip_weapon(slot_index: int) -> void:
 			current_hit_tween.kill()
 
 	current_weapon_slot = slot_index
+	update_weapon_hud_visibility()
 	
 	if held_item_sprite == null:
 		return
