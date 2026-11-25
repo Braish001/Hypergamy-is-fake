@@ -48,12 +48,25 @@ var water_hold_drain_timer: float = 0.0
 @export var shotgun_muzzle_offset: Vector2 = Vector2(300.0, -37.0)
 @export var max_shotgun_ammo: int = 2               # Максимум 2 патрона в дробовике
 @export var max_reserve_shotgun_ammo: int = 2       # Максимум 2 патрона можно хранить у себя в запасе
-@export var shotgun_reload_duration: float = 0.35   # Длительность быстрой зарядки 1 патрона (под будущую анимку)
+@export var shotgun_reload_duration: float = 0.35   # Длительность быстрой зарядки 1 патрона
+
+@export_group("Shotgun Reload Animation")
+@export var shotgun_reload_texture: Texture2D                  # Картинка для анимации перезарядки 1 патрона
+@export var shotgun_reload_scale: Vector2 = Vector2(0.47, 0.47) # Масштаб картинки перезарядки
+@export var shotgun_reload_offset: Vector2 = Vector2(43, 25)  # Смещение картинки перезарядки относительно игрока
+@export var shotgun_reload_rotation: float = -22.0            # Базовый наклон в градусах во время зарядки
+@export var shotgun_reload_flip_h: bool = true                # Горизонтальный отзеркаливание картинки перезарядки
+@export var shotgun_reload_kick: Vector2 = Vector2(-10.0, -14.0) # Короткий ход картинки во время зарядки
+@export_group("")
+
 var shotgun_ammo_in_mag: int = 0                    # Изначально 0 патронов в дробовике
 var reserve_shotgun_ammo: int = 0                   # Подобранные с карты патроны (до 2 штук у себя)
 var shotgun_cooldown_timer: float = 0.0
 var shotgun_reload_timer: float = 0.0
 var is_reloading_shotgun: bool = false
+var _reload_anim_offset: Vector2 = Vector2.ZERO
+var _reload_anim_rot_deg: float = 0.0
+var _current_reload_tween: Tween = null
 
 @export var shotgun_shot_sound: AudioStream          # Краткий звук выстрела
 @export var shotgun_shot_volume_db: float = -8.0     # Приглушение громкого выстрела
@@ -146,6 +159,8 @@ func _ready() -> void:
 	reserve_shotgun_ammo = 0
 	shotgun_reload_timer = 0.0
 	is_reloading_shotgun = false
+	_reload_anim_offset = Vector2.ZERO
+	_reload_anim_rot_deg = 0.0
 	album_cooldown_left = 0.0
 
 	var img = Image.load_from_file("res://sprites/cursor_game.png")
@@ -245,6 +260,10 @@ func _physics_process(delta: float) -> void:
 		if shotgun_reload_timer <= 0.0:
 			shotgun_reload_timer = 0.0
 			is_reloading_shotgun = false
+			_reload_anim_offset = Vector2.ZERO
+			_reload_anim_rot_deg = 0.0
+			if current_weapon_slot == 2 and weapon_textures.size() > 2 and weapon_textures[2] != null and held_item_sprite != null:
+				held_item_sprite.texture = weapon_textures[2]
 			_on_shotgun_single_shell_reloaded()
 
 	# 3.3. Таймер скрытия картинки альбома по центру экрана (1 сек)
@@ -379,21 +398,39 @@ func reload_shotgun() -> void:
 		print("Нет патронов у себя для зарядки!")
 		return
 	
-	# Заряжаем строго 1 патрон за нажатие R (быстрая зарядка, сюда позже добавим анимацию)
+	# Заряжаем строго 1 патрон за нажатие R + запускаем быструю анимацию картинки
 	reserve_shotgun_ammo -= 1
 	shotgun_ammo_in_mag += 1
 	update_shotgun_hud()
 	is_reloading_shotgun = true
-	shotgun_reload_timer = shotgun_reload_duration
-	_play_single_shell_reload_anim_placeholder()
+	shotgun_reload_timer = max(shotgun_reload_duration, 0.05)
+	_play_single_shell_reload_anim(shotgun_reload_timer)
 	print("Заряжен 1 патрон! В дробовике: ", shotgun_ammo_in_mag, "/", max_shotgun_ammo, " | У себя в запасе: ", reserve_shotgun_ammo, "/", max_reserve_shotgun_ammo)
 
-func _play_single_shell_reload_anim_placeholder() -> void:
-	# Заготовка под быструю анимацию зарядки одного патрона
-	pass
+func _play_single_shell_reload_anim(duration: float) -> void:
+	if _current_reload_tween != null and _current_reload_tween.is_valid():
+		_current_reload_tween.kill()
+
+	_reload_anim_offset = Vector2.ZERO
+	_reload_anim_rot_deg = 0.0
+
+	if held_item_sprite != null and shotgun_reload_texture != null:
+		held_item_sprite.texture = shotgun_reload_texture
+		held_item_sprite.visible = true
+		held_item_sprite.self_modulate = Color(1, 1, 1, 1)
+
+	var half_t: float = duration * 0.5
+	_current_reload_tween = create_tween()
+	_current_reload_tween.set_parallel(true)
+	_current_reload_tween.tween_property(self, "_reload_anim_offset", shotgun_reload_kick, half_t).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_current_reload_tween.tween_property(self, "_reload_anim_rot_deg", -14.0, half_t).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+	_current_reload_tween.chain().set_parallel(true)
+	_current_reload_tween.tween_property(self, "_reload_anim_offset", Vector2.ZERO, half_t).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	_current_reload_tween.tween_property(self, "_reload_anim_rot_deg", 0.0, half_t).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 
 func _on_shotgun_single_shell_reloaded() -> void:
-	# Заготовка под завершение анимации зарядки одного патрона
+	# Заготовка под дополнительные эффекты при завершении зарядки 1 патрона
 	pass
 
 func shoot_shotgun() -> void:
@@ -572,6 +609,16 @@ func _process(delta: float) -> void:
 			_active_ringings.remove_at(i)
 
 	if held_item_sprite != null and held_item_sprite.visible and current_weapon_slot != -1:
+		# --- ОТДЕЛЬНАЯ АНИМАЦИЯ ПЕРЕЗАРЯДКИ ОДНОГО ПАТРОНА ДРОБОВИКА ---
+		if is_reloading_shotgun and shotgun_reload_texture != null:
+			held_item_sprite.texture = shotgun_reload_texture
+			held_item_sprite.scale = shotgun_reload_scale
+			held_item_sprite.position = shotgun_reload_offset + _reload_anim_offset
+			held_item_sprite.rotation = deg_to_rad(shotgun_reload_rotation + _reload_anim_rot_deg)
+			held_item_sprite.flip_v = false
+			held_item_sprite.flip_h = shotgun_reload_flip_h
+			return
+
 		held_item_sprite.scale = weapon_scales[current_weapon_slot]
 		var offset = weapon_offsets[current_weapon_slot]
 		
@@ -663,6 +710,15 @@ func equip_weapon(slot_index: int) -> void:
 		is_hitting_self = false
 		if current_hit_tween and current_hit_tween.is_valid():
 			current_hit_tween.kill()
+
+	# Если сменили слот во время перезарядки — сбрасываем анимацию перезарядки
+	if is_reloading_shotgun:
+		is_reloading_shotgun = false
+		shotgun_reload_timer = 0.0
+		_reload_anim_offset = Vector2.ZERO
+		_reload_anim_rot_deg = 0.0
+		if _current_reload_tween != null and _current_reload_tween.is_valid():
+			_current_reload_tween.kill()
 
 	current_weapon_slot = slot_index
 	update_weapon_hud_visibility()

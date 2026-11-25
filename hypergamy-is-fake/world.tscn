@@ -30,6 +30,7 @@
 [ext_resource type="PackedScene" uid="uid://du7bryuqe0m1j" path="res://shotgun_blast.tscn" id="18_4h6ng"]
 [ext_resource type="PackedScene" uid="uid://byd2xvmqbd68p" path="res://album_range.tscn" id="19_o3ebs"]
 [ext_resource type="AudioStream" uid="uid://bcbh7n5qu3v6r" path="res://sounds/freesound_community-shotgun-firing-4-6746.mp3" id="22_gggvi"]
+[ext_resource type="Texture2D" uid="uid://ds02ld41d2trb" path="res://sprites/shotgun(reload).png" id="22_w44yn"]
 [ext_resource type="AudioStream" uid="uid://c5b6pcrfl7von" path="res://sounds/floraphonic-metal-whoosh-hit-10-202176.mp3" id="23_jjr1n"]
 [ext_resource type="AudioStream" uid="uid://bro4wdql80dyy" path="res://sounds/freesound_community-tinnitus-31244.mp3" id="23_w44yn"]
 [ext_resource type="PackedScene" uid="uid://dck8x7lqfrqh1" path="res://ammo_pickup.tscn" id="27_o3ebs"]
@@ -355,6 +356,10 @@ water_stream_scene = ExtResource("17_il2jm")
 water_hud = NodePath("../CanvasLayer/WaterHud")
 water_amount_label = NodePath("../CanvasLayer/WaterHud/WaterAmountLabel")
 shotgun_blast_scene = ExtResource("18_4h6ng")
+shotgun_reload_texture = ExtResource("22_w44yn")
+shotgun_reload_scale = Vector2(0.47, 0.33)
+shotgun_reload_rotation = 0.0
+shotgun_reload_flip_h = false
 shotgun_shot_sound = ExtResource("22_gggvi")
 shotgun_shot_volume_db = -10.0
 ringing_sound = ExtResource("23_w44yn")
@@ -400,7 +405,19 @@ position = Vector2(82, 967)
 [node name="NPC6" parent="." unique_id=1036181146 instance=ExtResource("10_bo7i5")]
 position = Vector2(-84, 954)
 
-[node name="AmmoPickup6" parent="." unique_id=1432397265 instance=ExtResource("27_o3ebs")]
+[node name="AmmoPickup10" parent="." unique_id=1432397265 instance=ExtResource("27_o3ebs")]
+position = Vector2(858, -6)
+
+[node name="AmmoPickup9" parent="." unique_id=1045131374 instance=ExtResource("27_o3ebs")]
+position = Vector2(804, 13)
+
+[node name="AmmoPickup8" parent="." unique_id=1821900915 instance=ExtResource("27_o3ebs")]
+position = Vector2(769, 6)
+
+[node name="AmmoPickup7" parent="." unique_id=1506441085 instance=ExtResource("27_o3ebs")]
+position = Vector2(738, -74)
+
+[node name="AmmoPickup6" parent="." unique_id=268526385 instance=ExtResource("27_o3ebs")]
 position = Vector2(513, -11)
 
 [node name="AmmoPickup5" parent="." unique_id=582763872 instance=ExtResource("27_o3ebs")]
