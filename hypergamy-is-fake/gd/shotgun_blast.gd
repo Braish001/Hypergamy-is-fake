@@ -4,7 +4,7 @@ extends Node2D
 @onready var muzzle_flash: CanvasItem = $MuzzleFlash
 
 @export var pellet_count: int = 9              # 8-9 дробинок/линий
-@export var max_range: float = 1240           # Увеличено в ~1.5 раза (было 620.0)
+@export var max_range: float = 1480           # Увеличено в ~1.5 раза (было 620.0)
 @export var spread_degrees: float = 54.0       # Широкий разброс вверх/вниз по вееру
 @export var blast_lifetime: float = 0.24       # Длительность отображения линий и точек
 @export var flash_duration: float = 0.1        # Свечение у дула 0.1 секунды

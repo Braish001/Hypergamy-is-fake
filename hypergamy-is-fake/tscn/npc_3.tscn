@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://crl3hq8fk5ti6"]
 
-[ext_resource type="Script" uid="uid://bfchfl0wb0ha0" path="res://npc.gd" id="1_yk8p1"]
+[ext_resource type="Script" uid="uid://bfchfl0wb0ha0" path="res://gd/npc.gd" id="1_yk8p1"]
 [ext_resource type="Texture2D" uid="uid://2hplmpyammpx" path="res://sprites/body_adam_2.png" id="2_ufif8"]
 [ext_resource type="Texture2D" uid="uid://bc3ds2wkoh8s2" path="res://sprites/trueadam_1.png" id="2_yk8p1"]
 

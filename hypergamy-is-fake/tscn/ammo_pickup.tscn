@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dck8x7lqfrqh1"]
 
-[ext_resource type="Script" uid="uid://d1uowkepqubt0" path="res://ammo_pickup.gd" id="1_hkks5"]
+[ext_resource type="Script" uid="uid://d1uowkepqubt0" path="res://gd/ammo_pickup.gd" id="1_hkks5"]
 [ext_resource type="Texture2D" uid="uid://ciwp8b5yqa1xm" path="res://sprites/ammobox.png" id="2_nxu3p"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_e6k2a"]

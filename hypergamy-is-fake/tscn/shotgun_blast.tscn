@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://du7bryuqe0m1j"]
 
-[ext_resource type="Script" uid="uid://dpnp1w7y2hueg" path="res://shotgun_blast.gd" id="1_bqf0b"]
+[ext_resource type="Script" uid="uid://dpnp1w7y2hueg" path="res://gd/shotgun_blast.gd" id="1_bqf0b"]
 
 [node name="ShotgunBlast" type="Node2D" unique_id=1721809773]
 script = ExtResource("1_bqf0b")

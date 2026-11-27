@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bsfgc62pnobl3"]
 
-[ext_resource type="Script" uid="uid://b4ari5sqg7s05" path="res://npc_2.gd" id="1_88fjt"]
+[ext_resource type="Script" uid="uid://b4ari5sqg7s05" path="res://gd/npc_2.gd" id="1_88fjt"]
 [ext_resource type="Texture2D" uid="uid://b725pf1kpy3dd" path="res://sprites/body_chad_2.png" id="2_decul"]
 [ext_resource type="Texture2D" uid="uid://cjgigo4rakgmy" path="res://sprites/chad_3.png" id="2_wqxq6"]
 

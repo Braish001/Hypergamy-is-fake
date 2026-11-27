@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://c0gmd4l6hkg1d"]
 
-[ext_resource type="Script" uid="uid://dduin2dfkiaie" path="res://player.gd" id="1_i3pqv"]
+[ext_resource type="Script" uid="uid://dduin2dfkiaie" path="res://gd/player.gd" id="1_i3pqv"]
 [ext_resource type="Texture2D" uid="uid://bdhqs068t3sfw" path="res://sprites/player_body.png" id="2_hqtel"]
 [ext_resource type="Texture2D" uid="uid://bmcsmnw852wg1" path="res://sprites/watergun.png" id="3_dw050"]
 [ext_resource type="Texture2D" uid="uid://byros4mw8px84" path="res://sprites/player(sub3).png" id="3_sweqy"]
 [ext_resource type="Texture2D" uid="uid://c31ui4u86ix5q" path="res://sprites/shotgun.png" id="4_b26j0"]
-[ext_resource type="Script" uid="uid://l6fq30r37yon" path="res://camera_2d.gd" id="4_hqtel"]
+[ext_resource type="Script" uid="uid://l6fq30r37yon" path="res://gd/camera_2d.gd" id="4_hqtel"]
 [ext_resource type="Texture2D" uid="uid://dfgjgrka8vo8" path="res://sprites/hypergamy.jpg" id="5_n7ghd"]
 [ext_resource type="Texture2D" uid="uid://bwrm33def6vbx" path="res://sprites/hammer.png" id="5_sweqy"]
 

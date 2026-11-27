@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cqiso0ty2tn2x"]
 
-[ext_resource type="Script" uid="uid://bfchfl0wb0ha0" path="res://npc.gd" id="1_4lnd8"]
+[ext_resource type="Script" uid="uid://bfchfl0wb0ha0" path="res://gd/npc.gd" id="1_4lnd8"]
 [ext_resource type="Texture2D" uid="uid://dvh7uoli17ixh" path="res://sprites/woman_1.png" id="2_e40gn"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_cbp6q"]

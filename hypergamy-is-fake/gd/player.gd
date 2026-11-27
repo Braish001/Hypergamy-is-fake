@@ -48,7 +48,13 @@ var water_hold_drain_timer: float = 0.0
 @export var shotgun_muzzle_offset: Vector2 = Vector2(300.0, -37.0)
 @export var max_shotgun_ammo: int = 2               # Максимум 2 патрона в дробовике
 @export var max_reserve_shotgun_ammo: int = 2       # Максимум 2 патрона можно хранить у себя в запасе
-@export var shotgun_reload_duration: float = 0.35   # Длительность быстрой зарядки 1 патрона
+@export var shotgun_reload_duration: float = 0.7    # Длительность зарядки 1 патрона (увеличено в 2 раза)
+
+@export_group("Shotgun Cursor")
+@export var shotgun_cursor_texture: Texture2D               # Картинка курсора при взятии дробовика
+@export var shotgun_cursor_size: Vector2i = Vector2i(48, 48) # Размер курсора дробовика в пикселях
+@export var shotgun_cursor_hotspot: Vector2 = Vector2(24.0, 24.0) # Точка привязки (центр прицела) курсора
+@export_group("")
 
 @export_group("Shotgun Reload Animation")
 @export var shotgun_reload_texture: Texture2D                  # Картинка для анимации перезарядки 1 патрона
@@ -67,6 +73,11 @@ var is_reloading_shotgun: bool = false
 var _reload_anim_offset: Vector2 = Vector2.ZERO
 var _reload_anim_rot_deg: float = 0.0
 var _current_reload_tween: Tween = null
+
+var _default_cursor_texture: Texture2D = null
+var _default_cursor_hotspot: Vector2 = Vector2(21.0, 15.0)
+var _shotgun_scaled_cursor: Texture2D = null
+var _last_cursor_sig: String = ""
 
 @export var shotgun_shot_sound: AudioStream          # Краткий звук выстрела
 @export var shotgun_shot_volume_db: float = -8.0     # Приглушение громкого выстрела
@@ -91,13 +102,21 @@ var _active_camera: Camera2D = null
 
 # --- ФОТОАЛЬБОМ (СЛОТ 3) ---
 @export var album_range_scene: PackedScene
-@export var album_meme_ui: TextureRect              # Картинка по центру экрана
+@export var album_flash_ui: TextureRect             # Полноэкранная фотка-вспышка на весь экран
 @export var album_range_duration: float = 0.7       # Красный сектор 1/3 круга — 0.7 сек
-@export var album_meme_duration: float = 1.0        # Случайная фотка по центру — 1 сек
+@export var album_flash_duration: float = 0.6       # Плавное исчезновение флешки — 0.6 сек
+@export var album_meme_sound: AudioStream           # Звук при появлении фотки
+@export var album_meme_sound_volume_db: float = 0.0 # Громкость звука появления фотки
+@export var album_meme_sound_start_at: float = 1.5  # С какой секунды внутри файла стартовать звук
+@export var album_meme_sound_duration: float = 0.0  # Сколько сек играть звук после старта (0.0 = до конца)
 @export var album_cooldown_duration: float = 12.0   # Отсчёт с 12 секунд после нажатия
+@onready var album_meme_player: AudioStreamPlayer = get_node_or_null("AlbumMemePlayer")
 var album_memes: Array[Texture2D] = []
 var is_album_active: bool = false
-var _meme_hide_timer: float = 0.0
+var _meme_sound_timer: float = 0.0
+var _meme_sound_total_duration: float = 0.0
+var _flash_timer: float = 0.0
+var _flash_start_modulate: Color = Color(1.35, 1.35, 1.35, 0.9)
 var album_cooldown_left: float = 0.0
 var _last_shown_countdown: int = -1
 
@@ -165,8 +184,8 @@ func _ready() -> void:
 
 	var img = Image.load_from_file("res://sprites/cursor_game.png")
 	img.resize(48, 48, Image.INTERPOLATE_BILINEAR)
-	var scaled_cursor = ImageTexture.create_from_image(img)
-	Input.set_custom_mouse_cursor(scaled_cursor, Input.CURSOR_ARROW, Vector2(21, 15))
+	_default_cursor_texture = ImageTexture.create_from_image(img)
+	_apply_cursor_for_slot(current_weapon_slot, true)
 
 	cortisol_stages = [
 		load("res://sprites/low_cortisol.png"),             
@@ -195,8 +214,11 @@ func _ready() -> void:
 		load("res://sprites/photo_9.png")
 	]
 
-	if album_meme_ui != null:
-		album_meme_ui.visible = false
+	if album_flash_ui != null:
+		_flash_start_modulate = album_flash_ui.modulate
+		if _flash_start_modulate.a <= 0.01:
+			_flash_start_modulate = Color(1.35, 1.35, 1.35, 0.9)
+		album_flash_ui.visible = false
 	
 	update_cortisol_display()
 	update_beauty_display()
@@ -208,7 +230,50 @@ func _ready() -> void:
 	if held_item_sprite != null:
 		held_item_sprite.visible = false
 
+func _build_shotgun_cursor() -> Texture2D:
+	if shotgun_cursor_texture == null:
+		return null
+	var tex_img := shotgun_cursor_texture.get_image()
+	if tex_img == null:
+		return shotgun_cursor_texture
+	var copy_img := tex_img.duplicate()
+	if copy_img.is_compressed():
+		copy_img.decompress()
+	var w := maxi(8, shotgun_cursor_size.x)
+	var h := maxi(8, shotgun_cursor_size.y)
+	if copy_img.get_width() != w or copy_img.get_height() != h:
+		copy_img.resize(w, h, Image.INTERPOLATE_BILINEAR)
+	return ImageTexture.create_from_image(copy_img)
+
+func _apply_cursor_for_slot(slot_index: int, force: bool = false) -> void:
+	var use_shotgun_cursor := (slot_index == 2 and shotgun_cursor_texture != null)
+	var sig := ""
+	if use_shotgun_cursor:
+		sig = "shotgun|" + str(shotgun_cursor_texture.resource_path) + "|" + str(shotgun_cursor_size) + "|" + str(shotgun_cursor_hotspot)
+	else:
+		sig = "default|" + str(_default_cursor_hotspot)
+
+	if not force and sig == _last_cursor_sig:
+		return
+	_last_cursor_sig = sig
+
+	if use_shotgun_cursor:
+		_shotgun_scaled_cursor = _build_shotgun_cursor()
+		var cur_tex := _shotgun_scaled_cursor if _shotgun_scaled_cursor != null else shotgun_cursor_texture
+		var max_w := float(cur_tex.get_width()) - 1.0
+		var max_h := float(cur_tex.get_height()) - 1.0
+		var clamped_hotspot := Vector2(
+			clampf(shotgun_cursor_hotspot.x, 0.0, maxf(0.0, max_w)),
+			clampf(shotgun_cursor_hotspot.y, 0.0, maxf(0.0, max_h))
+		)
+		Input.set_custom_mouse_cursor(cur_tex, Input.CURSOR_ARROW, clamped_hotspot)
+	elif _default_cursor_texture != null:
+		Input.set_custom_mouse_cursor(_default_cursor_texture, Input.CURSOR_ARROW, _default_cursor_hotspot)
+
 func _physics_process(delta: float) -> void:
+	# Обновляем курсор при подгонке параметров в Инспекторе во время игры
+	_apply_cursor_for_slot(current_weapon_slot, false)
+
 	# 1. Убывание кортизола (1 ед. за 60 секунд)
 	if cortisol > 0:
 		decay_timer += delta
@@ -251,7 +316,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		water_hold_drain_timer = 0.0
 
-	# 3.2. Кулдаун и таймер быстрой зарядки 1 патрона дробовика
+	# 3.2. Кулдаун и таймер зарядки 1 патрона дробовика
 	if shotgun_cooldown_timer > 0:
 		shotgun_cooldown_timer -= delta
 
@@ -266,13 +331,31 @@ func _physics_process(delta: float) -> void:
 				held_item_sprite.texture = weapon_textures[2]
 			_on_shotgun_single_shell_reloaded()
 
-	# 3.3. Таймер скрытия картинки альбома по центру экрана (1 сек)
-	if _meme_hide_timer > 0.0:
-		_meme_hide_timer -= delta
-		if _meme_hide_timer <= 0.0:
-			if album_meme_ui != null:
-				album_meme_ui.visible = false
-			is_album_active = false
+	# 3.3. Таймер плавного исчезновения полноэкранной флешки (0.6 сек)
+	if _flash_timer > 0.0:
+		_flash_timer = max(0.0, _flash_timer - delta)
+		if album_flash_ui != null:
+			var ratio: float = _flash_timer / max(album_flash_duration, 0.001)
+			var c := _flash_start_modulate
+			c.a = _flash_start_modulate.a * ratio
+			album_flash_ui.modulate = c
+			if _flash_timer <= 0.0:
+				album_flash_ui.visible = false
+				is_album_active = false
+
+	# 3.3.2. Ограничение длины звука после старта, если задано album_meme_sound_duration > 0
+	if _meme_sound_timer > 0.0:
+		_meme_sound_timer = max(0.0, _meme_sound_timer - delta)
+		if album_meme_player != null and album_meme_player.playing:
+			var fade_window: float = min(0.04, _meme_sound_total_duration * 0.25)
+			if fade_window > 0.0 and _meme_sound_timer <= fade_window:
+				var fade_ratio: float = _meme_sound_timer / fade_window
+				album_meme_player.volume_db = lerp(-36.0, album_meme_sound_volume_db, fade_ratio)
+		if _meme_sound_timer <= 0.0:
+			if album_meme_player != null and album_meme_player.playing:
+				album_meme_player.stop()
+			if album_meme_player != null:
+				album_meme_player.volume_db = album_meme_sound_volume_db
 
 	# 3.4. Обратный отсчёт альбома с 12 секунд (12, 11, 10 ... 2, 1 -> Ready for larp)
 	if album_cooldown_left > 0.0:
@@ -362,17 +445,40 @@ func _on_album_range_finished(triggered_any_npc: bool) -> void:
 func _on_album_effect_applied(triggered_any_npc: bool) -> void:
 	print("Зона альбома отработала. Задет NPC: ", triggered_any_npc)
 
+func _play_album_meme_sound() -> void:
+	if album_meme_player != null and album_meme_sound != null:
+		album_meme_player.stream = album_meme_sound
+		album_meme_player.volume_db = album_meme_sound_volume_db
+		var start_pos: float = max(0.0, album_meme_sound_start_at)
+		var stream_len: float = album_meme_sound.get_length()
+		if stream_len > 0.0 and start_pos >= stream_len:
+			start_pos = 0.0
+		album_meme_player.play(start_pos)
+		if album_meme_sound_duration > 0.0:
+			_meme_sound_total_duration = album_meme_sound_duration
+			_meme_sound_timer = album_meme_sound_duration
+		else:
+			_meme_sound_total_duration = 0.0
+			_meme_sound_timer = 0.0
+
 func _show_random_album_meme() -> void:
 	var valid_memes: Array[Texture2D] = []
 	for tex in album_memes:
 		if tex != null:
 			valid_memes.append(tex)
 	
-	if album_meme_ui != null and valid_memes.size() > 0:
-		var chosen_tex = valid_memes[randi() % valid_memes.size()]
-		album_meme_ui.texture = chosen_tex
-		album_meme_ui.visible = true
-		_meme_hide_timer = album_meme_duration
+	if valid_memes.size() <= 0:
+		is_album_active = false
+		return
+
+	var chosen_tex: Texture2D = valid_memes[randi() % valid_memes.size()]
+	_play_album_meme_sound()
+
+	if album_flash_ui != null:
+		album_flash_ui.texture = chosen_tex
+		album_flash_ui.visible = true
+		album_flash_ui.modulate = _flash_start_modulate
+		_flash_timer = max(album_flash_duration, 0.05)
 	else:
 		is_album_active = false
 
@@ -721,6 +827,7 @@ func equip_weapon(slot_index: int) -> void:
 			_current_reload_tween.kill()
 
 	current_weapon_slot = slot_index
+	_apply_cursor_for_slot(current_weapon_slot, false)
 	update_weapon_hud_visibility()
 	
 	if held_item_sprite == null:

@@ -1,0 +1,463 @@
+[gd_scene format=3 uid="uid://bawmcf62c2yap"]
+
+[ext_resource type="Texture2D" uid="uid://dnjd6mnuro5y2" path="res://sprites/wall_cross.png" id="1_vypr4"]
+[ext_resource type="Texture2D" uid="uid://sotoxhqrwvmt" path="res://sprites/wall_corner.png" id="2_dqjlh"]
+[ext_resource type="Texture2D" uid="uid://cwlechlbyquai" path="res://sprites/concrete_black.png" id="3_1i5m7"]
+[ext_resource type="Texture2D" uid="uid://u7nyiq1lqnk" path="res://sprites/wall_down.png" id="4_l5nai"]
+[ext_resource type="Texture2D" uid="uid://bqfpp06qvas40" path="res://sprites/concrete_white.png" id="5_batcj"]
+[ext_resource type="Texture2D" uid="uid://c4ol2gcrxsoxl" path="res://sprites/snow.png" id="6_oo6p6"]
+[ext_resource type="Texture2D" uid="uid://di1hsi22id7mq" path="res://sprites/wall_straight_g.png" id="7_a70dv"]
+[ext_resource type="PackedScene" uid="uid://c0gmd4l6hkg1d" path="res://tscn/player.tscn" id="8_yjtkk"]
+[ext_resource type="PackedScene" uid="uid://bbfewc6mfi8w4" path="res://tscn/water_stream.tscn" id="9_lklae"]
+[ext_resource type="PackedScene" uid="uid://du7bryuqe0m1j" path="res://tscn/shotgun_blast.tscn" id="10_ojkkm"]
+[ext_resource type="Texture2D" uid="uid://dd0vb04gqwoxi" path="res://sprites/cursor_shotgun.png" id="11_dqjlh"]
+[ext_resource type="Texture2D" uid="uid://ds02ld41d2trb" path="res://sprites/shotgun(reload).png" id="11_tuq7n"]
+[ext_resource type="AudioStream" uid="uid://bcbh7n5qu3v6r" path="res://sounds/freesound_community-shotgun-firing-4-6746.mp3" id="12_nybke"]
+[ext_resource type="AudioStream" uid="uid://bro4wdql80dyy" path="res://sounds/freesound_community-tinnitus-31244.mp3" id="13_pep2b"]
+[ext_resource type="PackedScene" uid="uid://byd2xvmqbd68p" path="res://tscn/album_range.tscn" id="14_frgua"]
+[ext_resource type="AudioStream" uid="uid://dj6i384xe64f0" path="res://sounds/re-zero-return-by-death_aevTUGH.mp3" id="15_62wcb"]
+[ext_resource type="AudioStream" uid="uid://c5b6pcrfl7von" path="res://sounds/floraphonic-metal-whoosh-hit-10-202176.mp3" id="16_xqoa2"]
+[ext_resource type="Texture2D" uid="uid://bwrm33def6vbx" path="res://sprites/hammer.png" id="17_p3jnh"]
+[ext_resource type="Texture2D" uid="uid://bmcsmnw852wg1" path="res://sprites/watergun.png" id="18_nu2sw"]
+[ext_resource type="Texture2D" uid="uid://c31ui4u86ix5q" path="res://sprites/shotgun.png" id="19_mel8o"]
+[ext_resource type="Texture2D" uid="uid://cuptejifhwy8r" path="res://sprites/documents.png" id="20_8jowy"]
+[ext_resource type="PackedScene" uid="uid://bbo12xh5pynwv" path="res://tscn/npc.tscn" id="21_dyca1"]
+[ext_resource type="PackedScene" uid="uid://bsfgc62pnobl3" path="res://tscn/npc_2.tscn" id="22_bh0yf"]
+[ext_resource type="PackedScene" uid="uid://crl3hq8fk5ti6" path="res://tscn/npc_3.tscn" id="23_ahfgj"]
+[ext_resource type="PackedScene" uid="uid://bvhap3fyukl4c" path="res://tscn/npc_4.tscn" id="24_maxfx"]
+[ext_resource type="PackedScene" uid="uid://5y1nbsveuq53" path="res://tscn/npc_5.tscn" id="25_tnjmp"]
+[ext_resource type="PackedScene" uid="uid://cnd24ltbtoic3" path="res://tscn/npc6.tscn" id="26_3obtk"]
+[ext_resource type="PackedScene" uid="uid://cqiso0ty2tn2x" path="res://tscn/npc7.tscn" id="27_eklvq"]
+[ext_resource type="PackedScene" uid="uid://dck8x7lqfrqh1" path="res://tscn/ammo_pickup.tscn" id="28_61tcf"]
+[ext_resource type="Texture2D" uid="uid://bvhkg1wha0pfi" path="res://sprites/low_cortisol.png" id="29_mtxsv"]
+[ext_resource type="FontFile" uid="uid://cunkbbni6k5bc" path="res://fonts/1papyrus.ttf" id="30_ctcho"]
+[ext_resource type="Script" uid="uid://ugcoi3lkrgkg" path="res://gd/weapon_wheel.gd" id="31_jc6bg"]
+[ext_resource type="AudioStream" uid="uid://bxd610nax0aey" path="res://sounds/item-select.mp3" id="32_wj6if"]
+[ext_resource type="Shader" uid="uid://cu3twhcxrrp6h" path="res://world.gdshader" id="33_7x4yn"]
+[ext_resource type="Texture2D" uid="uid://dseti2l2qdv8y" path="res://sprites/amountwater.png" id="34_dy5ma"]
+[ext_resource type="Texture2D" uid="uid://br0k0nmru8db4" path="res://sprites/amountshotgun.png" id="35_3s5k7"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_mbj86"]
+font_size = 28
+font_color = Color(0, 0, 0, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bc84e"]
+shader = ExtResource("33_7x4yn")
+shader_parameter/corner_radius = 0.0350000016625
+
+[node name="Game" type="Node2D" unique_id=319775989]
+
+[node name="World" type="Node2D" parent="." unique_id=1662916975]
+
+[node name="ColorRect" type="ColorRect" parent="World" unique_id=1913116965]
+offset_left = -396.0
+offset_top = -257.0
+offset_right = 1818.876
+offset_bottom = 1216.0
+
+[node name="ColorRect2" type="ColorRect" parent="World" unique_id=2039920024]
+offset_left = 1071.0
+offset_top = -743.0
+offset_right = 3285.876
+offset_bottom = 730.0
+color = Color(0, 1, 1, 1)
+
+[node name="Sprite2D4" type="Sprite2D" parent="World" unique_id=175697050]
+texture_filter = 1
+position = Vector2(291, 249)
+scale = Vector2(2, 2)
+texture = ExtResource("1_vypr4")
+
+[node name="Sprite2D3" type="Sprite2D" parent="World" unique_id=1254223863]
+texture_filter = 1
+position = Vector2(482, 362)
+rotation = 1.5707964
+texture = ExtResource("2_dqjlh")
+
+[node name="Sprite2D9" type="Sprite2D" parent="World" unique_id=1820097306]
+texture_filter = 1
+position = Vector2(290, 426)
+texture = ExtResource("3_1i5m7")
+
+[node name="Sprite2D6" type="Sprite2D" parent="World" unique_id=704611909]
+texture_filter = 1
+position = Vector2(290, 362)
+rotation = 1.5707964
+texture = ExtResource("4_l5nai")
+
+[node name="Sprite2D8" type="Sprite2D" parent="World" unique_id=768603782]
+texture_filter = 1
+position = Vector2(418, 426)
+texture = ExtResource("5_batcj")
+
+[node name="Sprite2D15" type="Sprite2D" parent="World" unique_id=395116227]
+texture_filter = 1
+position = Vector2(482, 298)
+rotation = 1.5707964
+texture = ExtResource("6_oo6p6")
+
+[node name="Sprite2D14" type="Sprite2D" parent="World" unique_id=679000645]
+texture_filter = 1
+position = Vector2(546, 426)
+rotation = -1.5707964
+texture = ExtResource("6_oo6p6")
+
+[node name="Sprite2D13" type="Sprite2D" parent="World" unique_id=1659834052]
+texture_filter = 1
+position = Vector2(610, 298)
+texture = ExtResource("6_oo6p6")
+
+[node name="Sprite2D12" type="Sprite2D" parent="World" unique_id=1351258203]
+texture_filter = 1
+position = Vector2(546, 298)
+rotation = -3.1415925
+texture = ExtResource("6_oo6p6")
+
+[node name="Sprite2D11" type="Sprite2D" parent="World" unique_id=1011174357]
+texture_filter = 1
+position = Vector2(546, 362)
+texture = ExtResource("6_oo6p6")
+
+[node name="Sprite2D10" type="Sprite2D" parent="World" unique_id=1005309355]
+texture_filter = 1
+position = Vector2(418, 298)
+texture = ExtResource("6_oo6p6")
+
+[node name="Sprite2D5" type="Sprite2D" parent="World" unique_id=599007064]
+texture_filter = 1
+position = Vector2(418, 362)
+texture = ExtResource("7_a70dv")
+
+[node name="Sprite2D7" type="Sprite2D" parent="World" unique_id=348512854]
+texture_filter = 1
+position = Vector2(482, 426)
+texture = ExtResource("4_l5nai")
+
+[node name="Sprite2D2" type="Sprite2D" parent="World" unique_id=684889334]
+texture_filter = 1
+position = Vector2(354, 426)
+texture = ExtResource("4_l5nai")
+
+[node name="Sprite2D" type="Sprite2D" parent="World" unique_id=146060346]
+texture_filter = 1
+position = Vector2(291, 121)
+rotation = -3.1415925
+scale = Vector2(2, 2)
+texture = ExtResource("4_l5nai")
+
+[node name="Characters" type="Node2D" parent="." unique_id=999028617]
+position = Vector2(291, 249)
+scale = Vector2(2, 2)
+
+[node name="Player" parent="Characters" unique_id=1275611609 node_paths=PackedStringArray("cortisol_ui", "cortisol_label", "beauty_ui", "water_hud", "water_amount_label", "shotgun_hud", "shotgun_ammo_label", "shotgun_reserve_label", "album_flash_ui", "album_hud", "album_status_label") instance=ExtResource("8_yjtkk")]
+position = Vector2(-171.5, -142.5)
+scale = Vector2(0.5, 0.5)
+cortisol_ui = NodePath("../../UI/TextureRect")
+cortisol_label = NodePath("../../UI/TextureRect/Label")
+beauty_ui = NodePath("../../UI/BeautyTextureRect")
+water_stream_scene = ExtResource("9_lklae")
+water_hold_drain_interval = 0.2
+water_hud = NodePath("../../UI/WaterHud")
+water_amount_label = NodePath("../../UI/WaterHud/WaterAmountLabel")
+shotgun_blast_scene = ExtResource("10_ojkkm")
+shotgun_cursor_texture = ExtResource("11_dqjlh")
+shotgun_cursor_size = Vector2i(52, 52)
+shotgun_cursor_hotspot = Vector2(27, 27)
+shotgun_reload_texture = ExtResource("11_tuq7n")
+shotgun_reload_scale = Vector2(0.47, 0.33)
+shotgun_reload_rotation = 0.0
+shotgun_reload_flip_h = false
+shotgun_shot_sound = ExtResource("12_nybke")
+shotgun_shot_volume_db = -10.0
+ringing_sound = ExtResource("13_pep2b")
+ringing_duration = 9.0
+ringing_start_db = -14.0
+ringing_min_db = -52.0
+shotgun_hud = NodePath("../../UI/ShotgunHud")
+shotgun_ammo_label = NodePath("../../UI/ShotgunHud/ShotgunAmmoLabel")
+shotgun_reserve_label = NodePath("../../UI/ShotgunHud/ShotgunReserveLabel")
+album_range_scene = ExtResource("14_frgua")
+album_flash_ui = NodePath("../../UI/AlbumFlashUI")
+album_range_duration = 0.8
+album_flash_duration = 0.87
+album_meme_sound = ExtResource("15_62wcb")
+album_meme_sound_volume_db = -4.0
+album_meme_sound_start_at = 0.795
+album_meme_sound_duration = 2.0
+album_cooldown_duration = 1.0
+album_hud = NodePath("../../UI/AlbumHud")
+album_status_label = NodePath("../../UI/AlbumHud/AlbumStatusLabel")
+hit_sound = ExtResource("16_xqoa2")
+weapon_textures = Array[Texture2D]([ExtResource("17_p3jnh"), ExtResource("18_nu2sw"), ExtResource("19_mel8o"), ExtResource("20_8jowy")])
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Characters/Player" unique_id=279663413]
+stream = ExtResource("16_xqoa2")
+volume_db = -35.785
+
+[node name="ShotgunShotPlayer" type="AudioStreamPlayer" parent="Characters/Player" unique_id=620802520]
+
+[node name="RingingPlayer" type="AudioStreamPlayer" parent="Characters/Player" unique_id=1980312903]
+
+[node name="AlbumMemePlayer" type="AudioStreamPlayer" parent="Characters/Player" unique_id=1289846420]
+stream = ExtResource("15_62wcb")
+volume_db = 1.975
+
+[node name="NPCs" type="Node2D" parent="Characters" unique_id=1606123080]
+
+[node name="NPC2" parent="Characters/NPCs" unique_id=1520599775 instance=ExtResource("21_dyca1")]
+position = Vector2(149, 309)
+scale = Vector2(0.5, 0.5)
+
+[node name="NPC3" parent="Characters/NPCs" unique_id=707977642 instance=ExtResource("22_bh0yf")]
+position = Vector2(18.5, 321)
+scale = Vector2(0.5, 0.5)
+
+[node name="NPC" parent="Characters/NPCs" unique_id=162464678 instance=ExtResource("23_ahfgj")]
+position = Vector2(223.5, 309)
+scale = Vector2(0.5, 0.5)
+
+[node name="NPC4" parent="Characters/NPCs" unique_id=1759483975 instance=ExtResource("24_maxfx")]
+position = Vector2(300.5, 295.5)
+scale = Vector2(0.5, 0.5)
+
+[node name="NPC5" parent="Characters/NPCs" unique_id=663719395 instance=ExtResource("25_tnjmp")]
+position = Vector2(383.5, 303.5)
+scale = Vector2(0.5, 0.5)
+
+[node name="NPC7" parent="Characters/NPCs" unique_id=1640683601 instance=ExtResource("26_3obtk")]
+position = Vector2(-104.5, 359)
+scale = Vector2(0.5, 0.5)
+
+[node name="NPC6" parent="Characters/NPCs" unique_id=1036181146 instance=ExtResource("27_eklvq")]
+position = Vector2(-187.5, 352.5)
+scale = Vector2(0.5, 0.5)
+
+[node name="Interactables" type="Node2D" parent="." unique_id=2077310829]
+
+[node name="AmmoPickup10" parent="Interactables" unique_id=1432397265 instance=ExtResource("28_61tcf")]
+position = Vector2(858, -6)
+
+[node name="AmmoPickup9" parent="Interactables" unique_id=1045131374 instance=ExtResource("28_61tcf")]
+position = Vector2(804, 13)
+
+[node name="AmmoPickup8" parent="Interactables" unique_id=1821900915 instance=ExtResource("28_61tcf")]
+position = Vector2(769, 6)
+
+[node name="AmmoPickup7" parent="Interactables" unique_id=1506441085 instance=ExtResource("28_61tcf")]
+position = Vector2(738, -74)
+
+[node name="AmmoPickup6" parent="Interactables" unique_id=268526385 instance=ExtResource("28_61tcf")]
+position = Vector2(513, -11)
+
+[node name="AmmoPickup5" parent="Interactables" unique_id=582763872 instance=ExtResource("28_61tcf")]
+position = Vector2(563, 40)
+
+[node name="AmmoPickup4" parent="Interactables" unique_id=1539529947 instance=ExtResource("28_61tcf")]
+position = Vector2(613, 91)
+
+[node name="AmmoPickup3" parent="Interactables" unique_id=529842819 instance=ExtResource("28_61tcf")]
+position = Vector2(663, 142)
+
+[node name="AmmoPickup" parent="Interactables" unique_id=843070066 instance=ExtResource("28_61tcf")]
+position = Vector2(553, 135)
+
+[node name="AmmoPickup2" parent="Interactables" unique_id=860348255 instance=ExtResource("28_61tcf")]
+position = Vector2(581, 179)
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1715652402]
+
+[node name="TextureRect" type="TextureRect" parent="UI" unique_id=2078435053]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -1198.0
+offset_top = 441.0
+offset_right = -851.4054
+offset_bottom = 670.0
+grow_horizontal = 0
+size_flags_horizontal = 8
+size_flags_vertical = 0
+texture = ExtResource("29_mtxsv")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="UI/TextureRect" unique_id=1687700362]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 0
+offset_left = 245.0
+offset_top = 26.0
+offset_right = 386.0
+offset_bottom = 68.0
+theme_override_fonts/font = ExtResource("30_ctcho")
+theme_override_font_sizes/font_size = 24
+label_settings = SubResource("LabelSettings_mbj86")
+
+[node name="WeaponWheel" type="Control" parent="UI" unique_id=1140077928 node_paths=PackedStringArray("player_node")]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 850.0
+offset_top = 392.0
+offset_right = 1137.1915
+offset_bottom = 639.0
+focus_mode = 2
+script = ExtResource("31_jc6bg")
+player_node = NodePath("../../Characters/Player")
+
+[node name="TextureRect4" type="TextureRect" parent="UI/WeaponWheel" unique_id=2111577705]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 72.0
+offset_right = 293.0
+offset_bottom = 328.82434
+pivot_offset = Vector2(50, 130)
+offset_transform_enabled = true
+offset_transform_rotation = -0.87266463
+texture = ExtResource("20_8jowy")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextureRect3" type="TextureRect" parent="UI/WeaponWheel" unique_id=1421663805]
+layout_mode = 0
+offset_left = 7.000023
+offset_top = 89.0
+offset_right = 302.1784
+offset_bottom = 237.0
+scale = Vector2(1.0027837, 1)
+pivot_offset = Vector2(50, 130)
+offset_transform_enabled = true
+offset_transform_rotation = 1.7453293
+texture = ExtResource("19_mel8o")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextureRect2" type="TextureRect" parent="UI/WeaponWheel" unique_id=2066754861]
+layout_mode = 0
+offset_left = -9.0
+offset_top = 64.0
+offset_right = 212.42708
+offset_bottom = 283.80847
+pivot_offset = Vector2(50, 130)
+offset_transform_enabled = true
+offset_transform_rotation = -4.6251225
+texture = ExtResource("18_nu2sw")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextureRect" type="TextureRect" parent="UI/WeaponWheel" unique_id=496785971]
+layout_mode = 0
+offset_left = -53.000015
+offset_top = 98.0
+offset_right = 168.15857
+offset_bottom = 317.80847
+pivot_offset = Vector2(50, 130)
+offset_transform_enabled = true
+offset_transform_rotation = -0.61086524
+texture = ExtResource("17_p3jnh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="UI/WeaponWheel" unique_id=428803521]
+stream = ExtResource("32_wj6if")
+volume_db = -23.719
+
+[node name="BeautyTextureRect" type="TextureRect" parent="UI" unique_id=141403734]
+material = SubResource("ShaderMaterial_bc84e")
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -145.0
+offset_top = 8.0
+offset_right = -14.0
+offset_bottom = 139.0
+grow_horizontal = 0
+expand_mode = 3
+
+[node name="WaterHud" type="Control" parent="UI" unique_id=1306189136]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureRect" type="TextureRect" parent="UI/WaterHud" unique_id=1408354777]
+layout_mode = 0
+offset_left = 544.0
+offset_top = 496.0
+offset_right = 682.0
+offset_bottom = 634.0
+texture = ExtResource("34_dy5ma")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="WaterAmountLabel" type="Label" parent="UI/WaterHud" unique_id=173042924]
+layout_mode = 0
+offset_left = 652.0
+offset_top = 578.0
+offset_right = 733.0
+offset_bottom = 652.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("30_ctcho")
+theme_override_font_sizes/font_size = 41
+text = "100"
+
+[node name="ShotgunHud" type="Control" parent="UI" unique_id=395709180]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="CatAmmoIcon" type="TextureRect" parent="UI/ShotgunHud" unique_id=1312541354]
+layout_mode = 0
+offset_left = 503.0
+offset_top = 486.0
+offset_right = 683.0
+offset_bottom = 629.0
+texture = ExtResource("35_3s5k7")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ShotgunAmmoLabel" type="Label" parent="UI/ShotgunHud" unique_id=209085067]
+layout_mode = 0
+offset_left = 685.0
+offset_top = 482.0
+offset_right = 789.0
+offset_bottom = 570.0
+theme_override_colors/font_color = Color(0.6745098, 0, 0.15294118, 1)
+theme_override_fonts/font = ExtResource("30_ctcho")
+theme_override_font_sizes/font_size = 50
+text = "0/2"
+
+[node name="ShotgunReserveLabel" type="Label" parent="UI/ShotgunHud" unique_id=1176518314]
+layout_mode = 0
+offset_left = 685.0
+offset_top = 572.0
+offset_right = 725.0
+offset_bottom = 646.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("30_ctcho")
+theme_override_font_sizes/font_size = 50
+text = "0"
+
+[node name="AlbumHud" type="Control" parent="UI" unique_id=240612324]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="AlbumStatusLabel" type="Label" parent="UI/AlbumHud" unique_id=2088489505]
+layout_mode = 0
+offset_left = 545.0
+offset_top = 577.0
+offset_right = 784.0
+offset_bottom = 631.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("30_ctcho")
+theme_override_font_sizes/font_size = 38
+text = "Ready for larp"
+
+[node name="AlbumFlashUI" type="TextureRect" parent="UI" unique_id=1972244354]
+visible = false
+offset_right = 1152.0
+offset_bottom = 648.0
+expand_mode = 1
